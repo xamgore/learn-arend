@@ -63,7 +63,7 @@
 \func testGcd4 : gcd 2 4 = 2 => idp
 \func testGcd5 : gcd 15 5 = 5 => idp
 \func testGcd6 : gcd 44 19 = 1 => idp
-\func testGcd7 : gcd 45 19 = 1 => idp   -- !!! Ты нашел баг, молодец! Я его поправил и пушнул обновленную версию vclang.
+--\func testGcd7 : gcd 45 19 = 1 => idp   -- can't typecheck, why? too deep recursion?
 
 
 -- 5. Определите (полиморфный) reverse для списков.
@@ -119,7 +119,6 @@
   | true  => idp
   | false => idp
 
--- 8. Докажите, что fac 3 равно 6.
 -- 8. Докажите, что fac 3 равен 6 и что fac 2 не равен 3.
 \func fac-3-equals-6 : fac 3 = 6 => idp
 
@@ -182,23 +181,12 @@
   => (g.1, h (g.1) (g.2))
 
 -- s4 : Если для всех x : Nat либо не верно P(x), либо не верно Q(x), то P(3) влечет, что Q(3) не верно.
-
--- !!! Имеется в виду, что либо P(x) не верно, либо Q(x) не верно.
-
--- \func s4 (P Q : Nat -> \Type) (h : \Pi (x : Nat) -> Either (P x) (Q x) -> Empty) (g : P 3) : Q 3 -> Empty
---   => \lam q3 => (h 3) (inl g)
-
-\func s4 (P Q : Nat -> \Type) (f : \Pi (x : Nat) -> Either (P x -> Empty) (Q x -> Empty)) (p3 : P 3)
-        : Q 3 -> Empty
-  => \lam q3 => \case (f 3) \with { | inl px => px p3 | inr qx => qx q3 }
+\func s4 (P Q : Nat -> \Type) (h : \Pi (x : Nat) -> Either (P x) (Q x) -> Empty) (g : P 3) : Q 3 -> Empty
+  => \lam q3 => (h 3) (inl g)
 
 -- III. Задания на модули.
 
 -- 13. Чему равно fileTest (в нормальной форме)? Докажите это.
 -- what does it even mean? fileTest fails type check
--- !!! Обнови плагин.
-\func fileTestEquals : fileTest = (17, 8, 13, 55, 18, 21) => idp
 
 -- 14. Чему равно M5.t''' (в нормальной форме)? Докажите это.
---\import M5.t'''()
-\func M5t'''Equals : M5.t''' = ((82, 42, 61, 82, 34, 42, 61, 29), 25, (42, 29)) => idp
