@@ -1,21 +1,40 @@
--- 1. Установите vclang, следуя инструкциям на странице https://arend.top/getting-started/
+\func idp  {A : \Type} {a : A} => path (\lam _ => a)
+
 
 -- 2. Определите аналоги следующих функций на языке хаскелл.
-{- Haskell:
-   second :: Nat -> Nat -> Nat -> Nat
-   second _ y _ = y
 
-   apply :: (Nat -> Nat) -> Nat -> Nat
-   apply f x = f x
-   
-   compose :: (Nat -> Nat) -> (Nat -> Nat) -> Nat -> Nat
-   compose f g x = f (g x)
-   
-   flip :: (Nat -> Nat -> Nat) -> Nat -> Nat -> Nat
-   flip f x y = f y x
-   
-   second' = flip (second 0)
--}
+--   second :: Nat -> Nat -> Nat -> Nat
+--   second _ y _ = y
+\func second (_ y _ : Nat) : Nat => y
+
+\func testSecond : second 1 2 3 = 2 => idp
+
+--   apply :: (Nat -> Nat) -> Nat -> Nat
+--   apply f x = f x
+\func apply (f : Nat -> Nat) (x : Nat) : Nat => f x
+
+\func testApply : apply (\lam x => x Nat.+ 1) 2 = 3 => idp
+
+--   compose :: (Nat -> Nat) -> (Nat -> Nat) -> Nat -> Nat
+--   compose f g x = f (g x)
+\func compose (f g : Nat -> Nat) (x : Nat) : Nat => f (g x)
+
+\func testCompose1 : compose (\lam x => x Nat.+ 1) (\lam x => x Nat.* 2) 0 = 1 => idp
+
+\func testCompose2 : compose (\lam x => x Nat.* 2) (\lam x => x Nat.+ 1) 0 = 2 => idp
+
+
+--   flip :: (Nat -> Nat -> Nat) -> Nat -> Nat -> Nat
+--   flip f x y = f y x
+\func flip (f : Nat -> Nat -> Nat) (x y : Nat) : Nat => f y x
+
+\func testFlip : flip (\lam x y => y) 0 1 = 0 => idp
+
+--   second' = flip (second 0)
+\func second' => flip (second 0)
+
+\func testSecond' : second' 3 2 = 2 => idp
+
 
 -- 3. Расставьте приоритеты функций f1, f2, f3, f4, f5 и f6 так, чтобы функция test проходила тайпчекинг.
 
@@ -23,9 +42,9 @@
 
 \func f1 (x y : Nat) => x
 \func f2 : Nat => 0
-\func f3 (f : Nat -> Nat) (z : Nat) : Int => 0
+\func \infixr 5 f3 (f : Nat -> Nat) (z : Nat) : Int => 0
 \func f4 : Nat => 0
-\func f5 => f1
+\func \infixr 10 f5 => f1
 \func f6 => f4
 
 \func test => f1 f2 f3 f4 f5 f6
