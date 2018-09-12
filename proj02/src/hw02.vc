@@ -63,7 +63,7 @@
 \func testGcd4 : gcd 2 4 = 2 => idp
 \func testGcd5 : gcd 15 5 = 5 => idp
 \func testGcd6 : gcd 44 19 = 1 => idp
---\func testGcd7 : gcd 45 19 = 1 => idp   -- can't typecheck, why? too deep recursion?
+\func testGcd7 : gcd 45 19 = 1 => idp   -- !!! Ты нашел баг, молодец! Я его поправил и пушнул обновленную версию vclang.
 
 
 -- 5. Определите (полиморфный) reverse для списков.
@@ -181,12 +181,16 @@
   => (g.1, h (g.1) (g.2))
 
 -- s4 : Если для всех x : Nat не верно либо P(x), либо Q(x), то P(3) влечет, что Q(3) не верно.
-\func s4 (P Q : Nat -> \Type) (h : \Pi (x : Nat) -> Either (P x) (Q x) -> Empty) (g : P 3) : Q 3 -> Empty
-  => \lam q3 => (h 3) (inl g)
+
+-- !!! Имеется в виду, что либо P(x) не верно, либо Q(x) не верно.
+
+-- \func s4 (P Q : Nat -> \Type) (h : \Pi (x : Nat) -> Either (P x) (Q x) -> Empty) (g : P 3) : Q 3 -> Empty
+--   => \lam q3 => (h 3) (inl g)
 
 -- III. Задания на модули.
 
 -- 13. Чему равно fileTest (в нормальной форме)? Докажите это.
 -- what does it even mean? fileTest fails type check
+-- !!! Обнови плагин.
 
 -- 14. Чему равно M5.t''' (в нормальной форме)? Докажите это.
