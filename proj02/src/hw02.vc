@@ -119,6 +119,7 @@
   | true  => idp
   | false => idp
 
+-- 8. Докажите, что fac 3 равно 6.
 -- 8. Докажите, что fac 3 равен 6 и что fac 2 не равен 3.
 \func fac-3-equals-6 : fac 3 = 6 => idp
 
