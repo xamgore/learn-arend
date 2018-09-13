@@ -184,10 +184,17 @@
 \func s4 (P Q : Nat -> \Type) (h : \Pi (x : Nat) -> Either (P x) (Q x) -> Empty) (g : P 3) : Q 3 -> Empty
   => \lam q3 => (h 3) (inl g)
 
+\func s4 (P Q : Nat -> \Type) (f : \Pi (x : Nat) -> Either (P x -> Empty) (Q x -> Empty)) (p3 : P 3)
+        : Q 3 -> Empty
+  => \lam q3 => \case (f 3) \with { | inl px => px p3 | inr qx => qx q3 }
+
 -- III. Задания на модули.
 
 -- 13. Чему равно fileTest (в нормальной форме)? Докажите это.
 -- what does it even mean? fileTest fails type check
 -- !!! Обнови плагин.
+\func fileTestEquals : fileTest = (17, 8, 13, 55, 18, 21) => idp
 
 -- 14. Чему равно M5.t''' (в нормальной форме)? Докажите это.
+--\import M5.t'''()
+\func M5t'''Equals : M5.t''' = ((82, 42, 61, 82, 34, 42, 61, 29), 25, (42, 29)) => idp
