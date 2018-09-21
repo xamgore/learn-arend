@@ -3,15 +3,19 @@
 -- 1. Докажите ассоциативность ++.
 
 \func \infixr 5 ++ {A : \Type} (xs ys : List A) : List A \elim xs
-  | fnil => ys
-  | fcons x xs => fcons x (xs ++ ys)
+  | nil => ys
+  | cons x xs => cons x (xs ++ ys)
 
-\func ++-assoc {A : \Type} (xs ys zs : List A) : (xs ++ ys) ++ zs = xs ++ (ys ++ zs) => {?}
+\func ++-assoc {A : \Type} (xs ys zs : List A) : (xs ++ ys) ++ zs = xs ++ (ys ++ zs)  \elim xs
+  | nil => idp
+  | cons x xs => pmap (cons x) (++-assoc xs ys zs)
 
 -- 2. На прошлой лекции мы определяли функцию T : Bool -> \Type рекурсивно.
 --    Определите аналогичную функцию индуктивно.
 
-\data T
+\data T (b : Bool) \elim b
+  | false => Empty
+  | true  => Unit
 
 -- 3. Напишите функцию lookup, которая принимает список и натуральное число и возвращает элемент по заданому индексу.
 --    В общем случае эту функцию определить невозможно, т.к. индекс может быть больше, чем число элементов в списке.
@@ -27,26 +31,78 @@
 
 -- 4. Реализуйте аналоги функции replicate для vec и Vec (эта функция создает список заданной длины, состоящий из повторений данного элемента).
 
+\func replicate {A : \Type} (x : A) (n : Nat) : vec A n \elim n
+  | 0      => ()
+  | suc n' => (x, (replicate x n'))
+
+\func replicate' {A : \Type} (x : A) (n : Nat) : Vec A n \elim n
+  | 0      => fnil
+  | suc n' => fcons x (replicate' x n')
+
 -- 5. Реализуйте аналоги функции map для vec и Vec.
+
+\func map {A B : \Type} (f : A -> B) {n : Nat} (v : vec A n) : vec B n \elim n
+  | 0      => ()
+  | suc n' => (f v.1, map f v.2)
+
+\func map' {A B : \Type} (f : A -> B) {n : Nat} (v : Vec A n) : Vec B n \elim n, v
+  | 0, _               => fnil
+  | suc n', fcons x xs => fcons (f x) (map' f xs)
 
 -- 6. Реализуйте аналоги функции zipWith для vec и Vec.
 --    Функция должна принимать вектора одинаковой длины.
 
+\func zipWith {A B C : \Type} (f : A -> B -> C) {n : Nat} (xs : vec A n) (ys : vec B n) : vec C n \elim n
+  | 0      => ()
+  | suc n' => (f xs.1 ys.1, zipWith f xs.2 ys.2)
+
+\func zipWith' {A B C : \Type} (f : A -> B -> C) {n : Nat} (xs : Vec A n) (ys : Vec B n) : Vec C n \elim n, xs, ys
+  | 0, _, _                        => fnil
+  | suc n', fcons x xs, fcons y ys => fcons (f x y) (zipWith' f xs ys)
+
+
+
 -- 7. Реализуйте Fin как рекурсивную функцию.
+{-
+Что-то не выходит :( Вероятно, мы хотим писать
+  \func fin0 : fin 3 => 0
+  \func fin1 : fin 3 => 1
+  \func fin2 : fin 3 => 2
+  -- \func fin3 : fin 3 => 3 --fails
+
+Если fin -- это \func, то такая фун-ия может вернуть какой-то *один* тип,
+  а не целое множество как в случае с \data. Нужен какой-то эквивалент
+  из \data { fzero | fsuc (Fin n) } только в \func.
+
+Возможно, что тип функции должен быть своего рода чекером - который будет
+  делать какую-то фигню, если тип значение после => в выражении
+  \func fin0 : fin 3 => ...
+  не подходит. Ну, например, если бы там были стрелки A -> A -> .. -> A,
+  то слишком много стрелок нельзя.
+
+\func fin (suc n : Nat) : \Type -> (fin n)
+Sigma? ну хз. Pi тоже не очень ясно как использовать.
+-}
+
 
 -- 8. Функции Fin n → A соответствуют спискам элементов A длины n.
 --    Функция, преобразующая Vec A n в Fin n → A, была реализована на лекции.
 --    Реализуйте обратную функцию.
 
-\func coin {A : \Type} {n : Nat} (f : Fin n -> A) : Vec A n => {?}
+\func coin {A : \Type} {n : Nat} (f : Fin n -> A) : Vec A n \elim n
+  | 0      => fnil
+  | suc n' => fcons (f fzero) (coin {A} {n'} f)  -- Fin (suc n') <: Fin n', wtf???
+                                                 -- {suc n'} doesn't work also
 
 -- 9. Определите тип матриц и ряд функций над ними.
 
-\func Mat (A : \Type) (n m : Nat) : \Type => {?}
+\func Mat (A : \Type) (n m : Nat) : \Type => Vec (Vec A n) m
 
 -- диагональная матрица с элементами e на диагонали и z на остальных позициях.
 
 \func diag {A : \Type} (z e : A) (n : Nat) : Mat A n n => {?}
+
+-- wtf, how to distinguish rows and cols?
 
 -- транспонирование матриц
 
