@@ -14,8 +14,19 @@
 --    Определите аналогичную функцию индуктивно.
 
 \data T (b : Bool) \elim b
-  | false => Empty
-  | true  => Unit
+  | true  => True
+
+\func absurdT {A : \Type} (e : T false) : A
+
+\func testT : T (true) => True
+
+\func testT2 : T (len (nil : List Nat) < 1) => True
+
+\func testT3 (xs : List Nat) (p : T (len xs < 1)) : Bool \elim xs
+  | nil => true
+  | _   => false
+
+\func testT3isTrue : (testT3 (nil : List Nat) True) = true => idp
 
 -- 3. Напишите функцию lookup, которая принимает список и натуральное число и возвращает элемент по заданому индексу.
 --    В общем случае эту функцию определить невозможно, т.к. индекс может быть больше, чем число элементов в списке.
@@ -27,17 +38,28 @@
   | suc x, 0 => false
   | suc x, suc y => x < y
 
-\func lookup => {?}
+\func len {A : \Type} (xs : List A) : Nat
+  | nil       => 0
+  | cons x xs => suc (len xs)
+
+\func lookup {A : \Type} (xs : List A) (idx : Nat) (p : T (idx < len xs)) : A \elim xs, idx
+  | cons x xs, 0     => x
+  | cons x xs, suc i => lookup xs i p
+  | nil,       idx   => absurdT (kek p)
+  \where \func kek {idx : Nat} (p : T (idx < 0)) : T false \elim idx
+    | zero    => p
+    | suc idx => p
+
 
 -- 4. Реализуйте аналоги функции replicate для vec и Vec (эта функция создает список заданной длины, состоящий из повторений данного элемента).
 
-\func replicate {A : \Type} (x : A) (n : Nat) : vec A n \elim n
+\func replicate' {A : \Type} (x : A) (n : Nat) : vec A n \elim n
   | 0      => ()
-  | suc n' => (x, (replicate x n'))
+  | suc n' => (x, (replicate' x n'))
 
-\func replicate' {A : \Type} (x : A) (n : Nat) : Vec A n \elim n
+\func replicate {A : \Type} (x : A) (n : Nat) : Vec A n \elim n
   | 0      => fnil
-  | suc n' => fcons x (replicate' x n')
+  | suc n' => fcons x (replicate x n')
 
 -- 5. Реализуйте аналоги функции map для vec и Vec.
 
@@ -89,20 +111,51 @@ Sigma? ну хз. Pi тоже не очень ясно как использов
 --    Функция, преобразующая Vec A n в Fin n → A, была реализована на лекции.
 --    Реализуйте обратную функцию.
 
-\func coin {A : \Type} {n : Nat} (f : Fin n -> A) : Vec A n \elim n
-  | 0      => fnil
-  | suc n' => fcons (f fzero) (coin {A} {n'} f)  -- Fin (suc n') <: Fin n', wtf???
-                                                 -- {suc n'} doesn't work also
+--\func toFin (n m : Nat) (p : T (n < m)) : Fin m
+--  | suc n, 0, Unit     => fzero
+--  | suc n, suc m, Unit => fsuc (toFin (suc n) m)
+
+
+--\func mth {A : \Type} {n : Nat} (f : Fin n -> A) (m : Nat) : A \elim n, m
+--  | suc n, 0 =>
+
+--\func coin' {A : \Type} {n : Nat} (f : Fin n -> A) (m : Nat) : Vec A m \elim n, m
+--  | 0, _         => fnil
+--  | suc n, 0     => fnil
+--  | suc n, suc m => fcons ()
+
+--  | suc m, suc n => fcons (f fzero) (coin f)
+
+--\func coin {A : \Type} {n : Nat} (f : Fin n -> A) : Vec A n => coin' f n
+
+
 
 -- 9. Определите тип матриц и ряд функций над ними.
 
-\func Mat (A : \Type) (n m : Nat) : \Type => Vec (Vec A n) m
+\func Mat (A : \Type) (n m : Nat) : \Type => Vec (Vec A m) n
 
 -- диагональная матрица с элементами e на диагонали и z на остальных позициях.
 
-\func diag {A : \Type} (z e : A) (n : Nat) : Mat A n n => {?}
+\func diag {A : \Type} (z e : A) (n : Nat) : Mat A n n => diag' z e n n
+  \where \func diag' {A : \Type} (z e : A) (m i : Nat) : Mat A i m \elim m, i
+    | _, 0     => fnil
+    | 0, suc i => fcons fnil (diag' z e 0 i)
+    | m, suc i => fcons (mk-i'th z e i m) (diag' z e m i)
 
--- wtf, how to distinguish rows and cols?
+\func set-i'th {A : \Type} (e : A) (i : Nat) {n : Nat} (v : Vec A n) : Vec A n \elim i, n, v
+  | suc i, suc n, fcons x xs => fcons x (set-i'th e i {n} xs)
+  | 0,     suc n, fcons x xs => fcons e xs
+  | _,     0,     fnil       => fnil
+
+\func mk-i'th {A : \Type} (z e : A) (i n : Nat) : Vec A n =>
+  set-i'th e i (replicate z n)
+
+\func testSet-i'th : (mk-i'th 5 7 1 3) = (fcons 5 (fcons 7 (fcons 5 fnil))) => idp
+
+\func test-diag : (diag 1 2 3) = (fcons trdRow (fcons sndRow (fcons fstRow fnil))) => idp
+  \where \func fstRow => fcons 2 (fcons 1 (fcons 1 fnil))
+         \func sndRow => fcons 1 (fcons 2 (fcons 1 fnil))
+         \func trdRow => fcons 1 (fcons 1 (fcons 2 fnil))
 
 -- транспонирование матриц
 
@@ -120,12 +173,44 @@ Sigma? ну хз. Pi тоже не очень ясно как использов
 -- 10. Определите тип CTree A n бинарных деревьев высоты ровно n, которые хранят элементы только во внутренних узлах, но не в листьях.
 --     Любое такое бинарное дерево будет полным.
 
-\data CTree (A : \Type) (n : Nat)
+\data CTree (A : \Type) (n : Nat) \elim n
+  | 0     => cLeaf
+  | suc n => cNode A (CTree A n) (CTree A n)
+
+--\func cTreeNotFull : CTree Nat 2 => cNode 1 (cNode 1 cLeaf cLeaf) (cLeaf)
+--\func cTreeTooHigh : CTree Nat 2 => cNode 1 (cNode 1 cLeaf cLeaf) (cNode 2 (cNode 1 cLeaf cLeaf) (cNode 1 cLeaf cLeaf))
+\func cTreeExample : CTree Nat 2 => cNode 1 (cNode 1 cLeaf cLeaf) (cNode 1 cLeaf cLeaf)
 
 -- 11. Определите тип Tree A n бинарных деревьев высоты не больше n, которые хранят элементы только во внутренних узлах, но не в листьях.
 
-\data Tree (A : \Type) (n : Nat)
+\data Tree (A : \Type) (n : Nat) \elim n
+  | 0     => Leaf
+  | suc n => { | Cut | Node A (Tree A n) (Tree A n) }
+
+\func treeExample  : Tree Nat 0 => Leaf
+\func treeExample2 : Tree Nat 1 => Cut
+\func treeExample3 : Tree Nat 2 => Node 1 (Node 1 Leaf Leaf) (Cut)
+--\func treeToHigh   : Tree Nat 1 => Node 1 (Node 1 Leaf Leaf) (Node 1 Leaf Leaf)
+
 
 -- определите функцию, возвращающую высоту дерева.
 
-\func height {A : \Type} (n : Nat) (t : Tree A n) : Fin (suc n) => {?}
+\func \infix 4 Fin< {n : Nat} (x y : Fin n) : Bool => (toNat x) < (toNat y)
+
+\func testFin< : (fin0 Fin< fin2) = true => idp
+
+\func max {n : Nat} (x y : Fin n) : Fin n => if (x Fin< y) y x
+
+\func fold {A B : \Type} {n : Nat} (t : Tree A n) (zero : B) (f : A -> B -> B -> B) : B \elim n, t
+  | 0,     Leaf       => zero
+  | suc n, Cut        => zero
+  | suc n, Node x l r => f x (fold l zero f) (fold r zero f)
+
+\func height {A : \Type} (n : Nat) (t : Tree A n) : Fin (suc n) => height'
+  \where \func height' {A : \Type} (h n : Nat) (t : Tree A h) : Fin n
+  \elim h, n, t
+    | 0,     _,     Leaf       => fzero
+    | suc h, suc n, Cut        => fzero
+    | suc h, suc n, Node x l r => fsuc (max (height' h (suc n) l) (height' h (suc n) r))
+
+--  fold t (fzero : Fin (suc n)) (\lam _ fl fr => fsuc (max fl fr))

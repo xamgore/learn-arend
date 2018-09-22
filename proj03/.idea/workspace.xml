@@ -1,0 +1,257 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ChangeListManager">
+    <list default="true" id="e3e6c96b-eddc-4b6b-bbe6-49b7c13b5774" name="Default" comment="" />
+    <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
+    <option name="TRACKING_ENABLED" value="true" />
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="FileEditorManager">
+    <leaf>
+      <file leaf-file-name="hw03.vc" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/src/hw03.vc">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="275">
+              <caret line="17" selection-start-line="17" selection-end-line="17" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="lect03.vc" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/lect03.vc">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="150">
+              <caret line="6" lean-forward="true" selection-start-line="6" selection-end-line="6" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="Prelude.vc" pinned="false" current-in-tab="false">
+        <entry file="mock:///Prelude.vc">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="289">
+              <caret line="32" column="20" lean-forward="true" selection-start-line="32" selection-start-column="20" selection-end-line="32" selection-end-column="20" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+    </leaf>
+  </component>
+  <component name="GradleLocalSettings">
+    <option name="projectSyncType">
+      <map>
+        <entry key="$PROJECT_DIR$/../../kotlin-course-se" value="PREVIEW" />
+      </map>
+    </option>
+  </component>
+  <component name="IdeDocumentHistory">
+    <option name="CHANGED_PATHS">
+      <list>
+        <option value="$PROJECT_DIR$/src/lect03.vc" />
+        <option value="$PROJECT_DIR$/src/hw03.vc" />
+      </list>
+    </option>
+  </component>
+  <component name="ProjectFrameBounds" extendedState="6" fullScreen="true">
+    <option name="x" value="230" />
+    <option name="y" value="40" />
+    <option name="width" value="1400" />
+    <option name="height" value="1000" />
+  </component>
+  <component name="ProjectView">
+    <navigator proportions="" version="1">
+      <foldersAlwaysOnTop value="true" />
+    </navigator>
+    <panes>
+      <pane id="PackagesPane" />
+      <pane id="ProjectPane">
+        <subPane>
+          <expand>
+            <path>
+              <item name="proj03" type="b2602c69:ProjectViewProjectNode" />
+              <item name="proj03" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="proj03" type="b2602c69:ProjectViewProjectNode" />
+              <item name="proj03" type="462c0819:PsiDirectoryNode" />
+              <item name="src" type="462c0819:PsiDirectoryNode" />
+            </path>
+          </expand>
+          <select />
+        </subPane>
+      </pane>
+      <pane id="Scope" />
+    </panes>
+  </component>
+  <component name="PropertiesComponent">
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/.." />
+  </component>
+  <component name="RunDashboard">
+    <option name="ruleStates">
+      <list>
+        <RuleState>
+          <option name="name" value="ConfigurationTypeDashboardGroupingRule" />
+        </RuleState>
+        <RuleState>
+          <option name="name" value="StatusDashboardGroupingRule" />
+        </RuleState>
+      </list>
+    </option>
+  </component>
+  <component name="RunManager" selected="Vclang TypeCheck.Typecheck ++-assoc">
+    <configuration default="true" type="Application" factoryName="Application">
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+    </configuration>
+    <configuration default="true" type="JUnit" factoryName="JUnit">
+      <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="false" />
+      <option name="ALTERNATIVE_JRE_PATH" />
+      <option name="PACKAGE_NAME" />
+      <option name="MAIN_CLASS_NAME" />
+      <option name="METHOD_NAME" />
+      <option name="TEST_OBJECT" value="class" />
+      <option name="VM_PARAMETERS" value="-ea" />
+      <option name="PARAMETERS" />
+      <option name="WORKING_DIRECTORY" value="%MODULE_WORKING_DIR%" />
+      <option name="PASS_PARENT_ENVS" value="true" />
+      <option name="TEST_SEARCH_SCOPE">
+        <value defaultName="singleModule" />
+      </option>
+      <patterns />
+    </configuration>
+    <configuration name="Typecheck ++-assoc" type="TypeCheckRunConfiguration" factoryName="Vclang TypeCheck" temporary="true" show_console_on_std_err="false" show_console_on_std_out="false">
+      <module name="proj03" />
+      <parameters>
+        <option name="definitionFullName" value="++-assoc" />
+        <option name="library" value="" />
+        <option name="modulePath" value="hw03" />
+      </parameters>
+    </configuration>
+    <configuration name="Typecheck hw03" type="TypeCheckRunConfiguration" factoryName="Vclang TypeCheck" temporary="true" show_console_on_std_err="false" show_console_on_std_out="false">
+      <module name="proj03" />
+      <parameters>
+        <option name="definitionFullName" value="" />
+        <option name="library" value="" />
+        <option name="modulePath" value="hw03" />
+      </parameters>
+    </configuration>
+    <configuration name="Typecheck lect03" type="TypeCheckRunConfiguration" factoryName="Vclang TypeCheck" temporary="true" show_console_on_std_err="false" show_console_on_std_out="false">
+      <module name="proj03" />
+      <parameters>
+        <option name="definitionFullName" value="" />
+        <option name="library" value="" />
+        <option name="modulePath" value="lect03" />
+      </parameters>
+    </configuration>
+    <configuration name="&lt;template&gt;" type="TestNG" default="true" selected="false">
+      <option name="VM_PARAMETERS" value="-ea" />
+      <option name="WORKING_DIRECTORY" value="%MODULE_WORKING_DIR%" />
+    </configuration>
+    <list>
+      <item itemvalue="Vclang TypeCheck.Typecheck hw03" />
+      <item itemvalue="Vclang TypeCheck.Typecheck lect03" />
+      <item itemvalue="Vclang TypeCheck.Typecheck ++-assoc" />
+    </list>
+    <recent_temporary>
+      <list>
+        <item itemvalue="Vclang TypeCheck.Typecheck ++-assoc" />
+        <item itemvalue="Vclang TypeCheck.Typecheck hw03" />
+        <item itemvalue="Vclang TypeCheck.Typecheck lect03" />
+      </list>
+    </recent_temporary>
+  </component>
+  <component name="TestHistory">
+    <history-entry file="Typecheck_++-assoc - 2018.09.19 at 14h 49m 02s.xml">
+      <configuration name="Typecheck ++-assoc" configurationId="TypeCheckRunConfiguration" />
+    </history-entry>
+    <history-entry file="Typecheck_hw03 - 2018.09.19 at 14h 49m 09s.xml">
+      <configuration name="Typecheck hw03" configurationId="TypeCheckRunConfiguration" />
+    </history-entry>
+    <history-entry file="Typecheck_hw03 - 2018.09.19 at 14h 49m 20s.xml">
+      <configuration name="Typecheck hw03" configurationId="TypeCheckRunConfiguration" />
+    </history-entry>
+    <history-entry file="Typecheck_++-assoc - 2018.09.19 at 14h 49m 27s.xml">
+      <configuration name="Typecheck ++-assoc" configurationId="TypeCheckRunConfiguration" />
+    </history-entry>
+    <history-entry file="Typecheck_++-assoc - 2018.09.19 at 14h 49m 29s.xml">
+      <configuration name="Typecheck ++-assoc" configurationId="TypeCheckRunConfiguration" />
+    </history-entry>
+    <history-entry file="Typecheck_++-assoc - 2018.09.19 at 14h 52m 30s.xml">
+      <configuration name="Typecheck ++-assoc" configurationId="TypeCheckRunConfiguration" />
+    </history-entry>
+    <history-entry file="Typecheck_++-assoc - 2018.09.19 at 14h 52m 58s.xml">
+      <configuration name="Typecheck ++-assoc" configurationId="TypeCheckRunConfiguration" />
+    </history-entry>
+    <history-entry file="Typecheck_++-assoc - 2018.09.19 at 14h 53m 11s.xml">
+      <configuration name="Typecheck ++-assoc" configurationId="TypeCheckRunConfiguration" />
+    </history-entry>
+    <history-entry file="Typecheck_++-assoc - 2018.09.19 at 14h 53m 18s.xml">
+      <configuration name="Typecheck ++-assoc" configurationId="TypeCheckRunConfiguration" />
+    </history-entry>
+    <history-entry file="Typecheck_++-assoc - 2018.09.19 at 14h 54m 02s.xml">
+      <configuration name="Typecheck ++-assoc" configurationId="TypeCheckRunConfiguration" />
+    </history-entry>
+  </component>
+  <component name="ToolWindowManager">
+    <frame x="0" y="-37" width="1920" height="1117" extended-state="6" />
+    <layout>
+      <window_info anchor="right" id="Key Promoter X" />
+      <window_info anchor="bottom" id="TODO" order="6" />
+      <window_info anchor="right" id="Palette&#9;" />
+      <window_info anchor="bottom" id="Event Log" side_tool="true" />
+      <window_info anchor="right" id="Maven Projects" />
+      <window_info anchor="bottom" id="Version Control" show_stripe_button="false" />
+      <window_info anchor="bottom" id="Run" order="2" weight="0.32905138" />
+      <window_info anchor="bottom" id="Terminal" />
+      <window_info id="Designer" />
+      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.21354167" />
+      <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
+      <window_info id="Favorites" side_tool="true" />
+      <window_info anchor="bottom" id="Debug" order="3" weight="0.4" />
+      <window_info anchor="bottom" id="Find" order="1" />
+      <window_info anchor="right" id="Commander" order="0" weight="0.4" />
+      <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
+      <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.25" />
+      <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
+      <window_info anchor="bottom" id="Message" order="0" />
+      <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
+    </layout>
+  </component>
+  <component name="VcsContentAnnotationSettings">
+    <option name="myLimit" value="2678400000" />
+  </component>
+  <component name="editorHistoryManager">
+    <entry file="file://$PROJECT_DIR$/src/lect03.vc">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="150">
+          <caret line="6" lean-forward="true" selection-start-line="6" selection-end-line="6" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/hw03.vc">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="275">
+          <caret line="17" selection-start-line="17" selection-end-line="17" />
+        </state>
+      </provider>
+    </entry>
+  </component>
+  <component name="masterDetails">
+    <states>
+      <state key="ProjectJDKs.UI">
+        <settings>
+          <last-edited>1.8</last-edited>
+          <splitter-proportions>
+            <option name="proportions">
+              <list>
+                <option value="0.2" />
+              </list>
+            </option>
+          </splitter-proportions>
+        </settings>
+      </state>
+    </states>
+  </component>
+</project>
