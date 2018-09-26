@@ -213,35 +213,20 @@
 -- 11. Определите тип Tree A n бинарных деревьев высоты не больше n, которые хранят элементы только во внутренних узлах, но не в листьях.
 -- Высота листа равна 0.
 -- Можно создавать конструкторы, который сразу для всех значений параметров \data определены.
+-- fixme: не очень понятно как, если честно
 
---\data Tree (A : \Type) (n : Nat)
---  | leaf
---  | node A (Tree A n) (Tree A n)
+\data Tree (A : \Type) (n : Nat) : \Type \elim n
+  | 0     => leaf
+  | suc n => { | cut | node A (Tree A n) (Tree A n) }
 
---\func treeExample  : Tree Nat 0 => leaf
---\func treeExample2 : Tree Nat 1 => leaf
---\func treeExample3 : Tree Nat 2 => node 1 (node 1 leaf leaf) (leaf)
---\func treeToHigh   : Tree Nat 1 => node 1 (node 1 leaf leaf) (node 1 leaf leaf)
---
---
+
 ---- определите функцию, возвращающую высоту дерева.
---
---\func \infix 4 Fin< {n : Nat} (x y : Fin n) : Bool => (toNat x) < (toNat y)
---
---\func testFin< : (fin0 Fin< fin2) = true => idp
---
---\func max {n : Nat} (x y : Fin n) : Fin n => if (x Fin< y) y x
 
---\func fold {A B : \Type} {n : Nat} (t : Tree A n) (zero : B) (f : A -> B -> B -> B) : B \elim n, t
---  | 0,     Leaf       => zero
---  | suc n, Cut        => zero
---  | suc n, Node x l r => f x (fold l zero f) (fold r zero f)
---
---\func height {A : \Type} (n : Nat) (t : Tree A n) : Fin (suc n) => height'
---  \where \func height' {A : \Type} (h n : Nat) (t : Tree A h) : Fin n
---  \elim h, n, t
---    | 0,     _,     Leaf       => fzero
---    | suc h, suc n, Cut        => fzero
---    | suc h, suc n, Node x l r => fsuc (max (height' h (suc n) l) (height' h (suc n) r))
+\func \infix 4 Fin< {n : Nat} (x y : Fin n) : Bool => (toNat x) < (toNat y)
 
---  fold t (fzero : Fin (suc n)) (\lam _ fl fr => fsuc (max fl fr))
+\func max {n : Nat} (x y : Fin n) : Fin n => if (x Fin< y) y x
+
+\func height {A : \Type} (n : Nat) (t : Tree A n) : Fin (suc n) \elim n, t
+  | 0,     leaf       => fzero
+  | suc n, cut        => fzero
+  | suc n, node _ l r => fsuc (max (height n l) (height n r))
