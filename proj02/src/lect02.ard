@@ -166,15 +166,13 @@
 -}
 
 \func \infixl 6 ++ {A : \Type} (xs ys : List A) : List A \elim xs
-  | nil       => ys
+  | nil => ys
   | cons x xs => cons x (xs ++ ys)
 {- Haskell:
    (++) :: List a -> List A -> List a
-   xs ++ Nil = xs
-   xs ++ cons y ys = cons y (xs ++ ys)
+   Nil ++ ys = ys
+   cons x xs ++ ys = cons x (xs ++ ys)
 -}
-
-\func test++ : cons 1 (cons 2 nil) ++ cons 3 (cons 4 nil) = cons 1 (cons 2 (cons 3 (cons 4 nil))) => idp
 
 -- 6. Пустой и одноэлементный типы, пары и \Sigma-типы.
 
@@ -327,17 +325,17 @@
 \module M2 \where {
     -- Если открыть модуль, то можно обращаться к его содержимому напрямую.
    \open M1
-   \func t => f  -- 82
-   \func t' => g  -- 77
-   \func t'' => h  -- 25
+   \func t => f
+   \func t' => g
+   \func t'' => h
 }
 
 \module M3 \where {
     -- Можно открыть только часть определений в модуле.
    \open M1(f,g)
-   \func t => f -- 82
-   \func t' => g -- 77
-   \func t'' => M1.h -- 25 -- К остальным определениям всё ещё можно доступаться по полному имени.
+   \func t => f
+   \func t' => g
+   \func t'' => M1.h -- К остальным определениям всё ещё можно доступаться по полному имени.
 }
 
 \module M4 \where {
@@ -348,9 +346,9 @@
        \func f2 => 61
        \func f3 => 29
      }
-   \func t => functionModule.f1  -- 42
-   \func t' => functionModule.f2  -- 61
-   \func t'' => (f1, f3)  -- (42, 29)
+   \func t => functionModule.f1
+   \func t' => functionModule.f2
+   \func t'' => (f1, f3)
      \where \open functionModule(f1,f3) -- данный \open относится ко всему, что объявленно в \where-блоке для t'', а также к самому t''.
 }
 
@@ -359,9 +357,7 @@
     \open M2 \hiding (t') -- открыть все определения кроме t'
     \open M3 (t \as M3_t) -- открыть только t, переименовав в M3_t.
     \open M4 \using (t \as M4_t) -- открыть все определения, переименовав t в M4_t.
-    -- (82, 42, 61, 82, 34, 42, 61, 29)
     \func t'' => (M3_t, M4_t, t', t, functionModule, functionModule.f1, functionModule.f2, functionModule.f3)
-
     \func t''' => (t'', M2.t'', M4.t'') -- t'' в текущем модуле перекрывает t'' из M2 и M4, но к ним всё ещё можно доступаться по полному имени.
 }
 
