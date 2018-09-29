@@ -216,9 +216,16 @@
 -- Можно создавать конструкторы, который сразу для всех значений параметров \data определены.
 -- fixme: не очень понятно как, если честно
 
+{-
 \data Tree (A : \Type) (n : Nat) : \Type \elim n
   | 0     => leaf
   | suc n => { | cut | node A (Tree A n) (Tree A n) }
+-}
+
+-- В смысле не можешь определить конструктор для всех n? Может я чего-то не понимаю, но как бы вот. What's the problem?
+\data Tree (A : \Type) (n : Nat) : \Type \elim n
+  | suc n => node A (Tree A n) (Tree A n)
+  | _     => leaf
 
 
 ---- определите функцию, возвращающую высоту дерева.
@@ -228,6 +235,5 @@
 \func max {n : Nat} (x y : Fin n) : Fin n => if (x Fin< y) y x
 
 \func height {A : \Type} (n : Nat) (t : Tree A n) : Fin (suc n) \elim n, t
-  | 0,     leaf       => fzero
-  | suc n, cut        => fzero
+  | _,     leaf       => fzero
   | suc n, node _ l r => fsuc (max (height n l) (height n r))
