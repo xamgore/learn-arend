@@ -114,6 +114,7 @@
   | inl A
   | inr B
 
+-- Но Fin 1 не состоит из 1 элемента, их там Nat + Nat, а в fin (suc n) их Nat + fin n. Может нужно написать 1 + fin n? Зачем тут вообще Nat?
 \func fin (n : Nat) : \Type \elim n
   | 0        => Empty
   | suc zero => Either Nat Nat
