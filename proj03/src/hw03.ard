@@ -117,12 +117,11 @@
 -- Но Fin 1 не состоит из 1 элемента, их там Nat + Nat, а в fin (suc n) их Nat + fin n. Может нужно написать 1 + fin n? Зачем тут вообще Nat?
 \func fin (n : Nat) : \Type \elim n
   | 0        => Empty
-  | suc zero => Either Nat Nat
-  | suc n    => Either Nat (fin n)
+  | suc n    => Either (\Sigma) (fin n)
 
-\func fin0' : fin 3 => inl 1
-\func fin1' : fin 3 => inr (inl 1)
-\func fin2' : fin 3 => inr (inr (inl 1))
+\func fin0' : fin 3 => inl ()
+\func fin1' : fin 3 => inr (inl ())
+\func fin2' : fin 3 => inr (inr (inl ()))
 --\func fin3' : fin 3 => inr (inr (inr (inl 1)))
 
 \func absurdFin' {A : \Type} (x : fin 0) : A
