@@ -3,7 +3,10 @@
 -- 1. Определите конгруэнтность для функций двух аргументов через transport.
 --    Можно использовать любые функции, определенные через transport.
 
-\func pmap2 {A B C : \Type} (f : A -> B -> C) {a a' : A} (p : a = a') {b b' : B} (q : b = b') : f a b = f a' b' => {?}
+\func pmap2 {A B C : \Type} (f : A -> B -> C) {a a' : A} (p : a = a') {b b' : B} (q : b = b') : f a b = f a' b' =>
+    \let g : f a b  = f a  b' => pmap (f a) q \in
+    \let h : f a b' = f a' b' => pmap (\lam x => f x b') p \in
+      trans g h
 
 -- 2. Докажите, что transport выражается через pmap и repl и наоборот.
 
@@ -12,39 +15,52 @@
 -- repl говорит, что если у нас есть два равных типа, то у нас есть функция из одного во второй.
 -- Определите repl через transport.
 
-\func repl {A B : \Type} (p : A = B) (a : A) : B => {?}
+\func repl {A B : \Type} (p : A = B) (a : A) : B
+  => transport (\lam x => x) p a
 
 -- Определите transport через repl и pmap.
 
-\func transport' {A : \Type} (B : A -> \Type) {a a' : A} (p : a = a') (b : B a) : B a' => {?}
+\func transport' {A : \Type} (B : A -> \Type) {a a' : A} (p : a = a') (b : B a) : B a'
+  => repl (pmap B p) b
 
 -- В заданиях 3-6 нельзя использовать не только coe, но и все функции, определенные через него, в частнсоти transport.
 
 -- 3. Мы доказали, что left = right через coe. Докажите это, не используя эту функцию.
 
-\func left=right : left = right => {?}
+\func left=right : left = right
+  => path (\lam i => i)
 
 -- 4. Докажите, что если a = a' и b = b', то (a,b) = (a',b'), не используя coe.
 
-\func pairEq {A B : \Type} {a a' : A} {b b' : B} (p : a = a') (q : b = b') : (a,b) = (a',b') => {?}
+\func pairEq {A B : \Type} {a a' : A} {b b' : B} (p : a = a') (q : b = b') : (a,b) = (a',b')
+  => path (\lam i => (p @ i, q @ i))
 
 -- 5. Докажите, что если p = p', то p.1 = p'.1, не используя coe.
 
-\func projEq {A : \Type} (B : A -> \Type) (p p' : \Sigma (x : A) (B x)) (t : p = p') : p.1 = p'.1 => {?}
+\func projEq {A : \Type} (B : A -> \Type) (p p' : \Sigma (x : A) (B x)) (t : p = p') : p.1 = p'.1
+  => path (\lam i => (t @ i).1)
 
 -- 6. Докажите pmap2, не используя coe.
 
-\func pmap2' {A B C : \Type} (f : A -> B -> C) {a a' : A} (p : a = a') {b b' : B} (q : b = b') : f a b = f a' b' => {?}
+\func pmap2' {A B C : \Type} (f : A -> B -> C) {a a' : A} (p : a = a') {b b' : B} (q : b = b') : f a b = f a' b'
+  => path (\lam i => f (p @ i) (q @ i))
 
 -- 7. Мы видели как определить transport через coe. Определите частный случай coe через transport.
 --    Можно ли определить transport через coe0?
---    Верно ли, что эти конструкции взаимообратны в том смысле что, если мы построим transport по coe, а потом coe0 по transport, то получим исходный (частный случай) coe? Верно ли, что они взаимообратны в обратную сторону.
+--    TODO Верно ли, что эти конструкции взаимообратны в том смысле что, если мы построим transport по coe, а потом coe0 по transport, то получим исходный (частный случай) coe? Верно ли, что они взаимообратны в обратную сторону.
 
-\func coe0 (A : I -> \Type) (a : A left) : A right => {?}
+\func coe0 (A : I -> \Type) (a : A left) : A right
+  => transport A left=right a
+
+\func transport0 {T : \Type} (B : T -> \Type) {x x' : T} (p : x = x') (a : B x) : B x'
+    => coe0 (\lam i => B (p @ i)) a
+
+-- todo: то есть надо показать, что coe = coe0? и что имелось в виду под "в обратную сторону"?
 
 -- 8. Определите функцию B right -> B left.
 
-\func Itr' {B : I -> \Type} (b : B right) : B left => {?}
+\func Itr' {B : I -> \Type} (b : B right) : B left
+  => transport B (sym left=right) b
 
 -- 9. Докажите, что (\lam x => not (not x)) = (\lam x => x).
 
@@ -52,4 +68,9 @@
   | true => false
   | false => true
 
-\func notNotId : (\lam x => not (not x)) = (\lam x => x) => {?}
+\func not-isInvolution (x : Bool) : not (not x) = x
+  | true => idp
+  | false => idp
+
+\func notNotId : (\lam x => not (not x)) = (\lam x => x)
+  => funExt (\lam _ => Bool) not-isInvolution
