@@ -1,11 +1,30 @@
 \import lect05
 \open Nat
 
+\func \infixr 1 >>= => (>==)
+\func \infix 2 =<< => (==<)
+
+
 -- 1. Докажите дистрибутивность умножения над сложением для натуральных чисел.
 
-\func ldistr (n m k : Nat) : n * (m + k) = n * m + n * k => {?}
+\func ldistr (n m k : Nat) : n * (m + k) = n * m + n * k \elim k
+  | 0     => idp
+  | suc k => pmap (\lam x => x + n) (ldistr n m k) *> (+-assoc (n * m) (n * k) n)
 
-\func rdistr (n m k : Nat) : (m + k) * n = m * n + k * n => {?}
+\func rdistr (n m k : Nat) : (m + k) * n = m * n + k * n \elim n
+  | 0     => idp
+  | suc n => ((m + k) * suc n               =<< idp
+         >>=  (m + k) * n + (m + k)         =<< pmap (\lam t => t + (m + k)) (rdistr n m k)
+         >>=  (m * n + k * n) + (m + k)     =<< +-assoc (m * n) (k * n) (m + k)
+         >>=  m * n + (k * n + (m + k))     =<< pmap (m * n +) (sym (+-assoc (k * n) m k))
+         >>=  m * n + ((k * n + m) + k)     =<< pmap (\lam t => m * n + (t + k)) (+-comm (k * n) m)
+         >>=  m * n + ((m + k * n) + k)     =<< pmap (m * n +) (+-assoc m (k * n) k)
+         >>=  m * n + (m + (k * n + k))     =<< sym (+-assoc (m * n) m (k * n + k))
+         >>=  (m * n + m) + (k * n + k)     =<< idp
+         >>=  ((m * suc n) + (k * suc n))   `qed)
+
+-- todo: можно ли в правой части что-нибудь сократить? ну кроме idp
+-- todo: есть ли левое сечение? (\lam t => t + (m + k)) на (+ (m + k))
 
 -- 2. Докажите, что reverse (reverse xs) = xs, где reverse определен через ++.
 
@@ -19,18 +38,59 @@
   | nil => nil
   | cons x xs => reverse xs ++ cons x nil
 
--- Это утверждение будет полезно для доказательства.
-\func reverse++ {A : \Type} (xs ys : List A) : reverse (xs ++ ys) = reverse ys ++ reverse xs => {?}
+\func ++-nil {A : \Type} (xs : List A) : xs = xs ++ nil \elim xs
+  | nil       => idp
+  | cons x xs => pmap (cons x) (++-nil xs)
 
-\func reverse-isInvolutive {A : \Type} (xs : List A) : reverse (reverse xs) = xs => {?}
+\func ++-assoc {A : \Type} (xs ys zs : List A) : (xs ++ ys) ++ zs = xs ++ (ys ++ zs) \elim xs
+  | nil => idp
+  | cons x xs => pmap (cons x) (++-assoc xs ys zs)
+
+
+-- Это утверждение будет полезно для доказательства.
+-- reverse (x : xs ++ ys) ==> reverse (xs ++ ys) ++ [x] <=> (reverse ys ++ reverse xs) ++ [x]
+--   <== reverse (y:ys) ++ (reverse xs ++ [x]) <== reverse (y:ys) ++ reverse (x:xs)
+\func reverse++ {A : \Type} (xs ys : List A) : reverse (xs ++ ys) = reverse ys ++ reverse xs \elim xs, ys
+  | nil, nil             => idp
+  | nil, cons y ys       => ++-nil (reverse ys ++ cons y nil)
+  | cons x xs, ys        => pmap (\lam t => t ++ cons x nil) (reverse++ xs ys)
+                              *> ++-assoc (reverse ys) (reverse xs) (cons x nil)
+
+-- reverse (reverse x : xs) ==> reverse (reverse xs ++ [x]) ==> reverse [x] ++ reverse (reverse xs)
+--   => [x] ++ xs => x : xs
+\func reverse-isInvolutive {A : \Type} (xs : List A) : reverse (reverse xs) = xs
+  | nil       => idp
+  | cons x xs => (reverse (reverse (cons x xs))                    =<< reverse++ (reverse xs) (cons x nil)
+             >>= (reverse (cons x nil)) ++ (reverse (reverse xs))  =<< pmap (cons x) (reverse-isInvolutive xs)
+             >>= (reverse (cons x nil)) ++ xs                      =<< idp
+             >>= cons x xs                                         `qed)
+
 
 -- 3. Докажите, что vnil является нейтральным элементом для v++.
 
-\func vnil-rightId {A : \Type} {n : Nat} (xs : Vec A n) : transport (Vec A) (+-comm 0 n) (xs v++ vnil) = xs => {?}
+--\func vnil-rightId {A : \Type} {n : Nat} (xs : Vec A n)
+--  : transport (Vec A) (+-comm 0 n) (xs v++ vnil) = xs \elim n, xs
+--  | 0,     vnil       => idp
+--  | suc n, vcons x xs => pmap (vcons x) (vnil-rightId xs) *>
+--      J (\lam e (p : 0 + n = e) =>
+--                  {?}
+----                    vcons x (transport (Vec A) p (xs v++ (ys v++ zs))) =
+----                    transport (Vec A) (pmap suc p) (vcons x (xs v++ (ys v++ zs))))
+--      ) idp (+-comm 0 n)
+
+-- todo: а почему J не доказан? О_о, и почему без его определения пруфается v++-assoc из лекции?
+-- todo: где вообще можно про этот J почитать? как он работает? почему мы пишем ту муть в v++-assoc?
+-- todo:                                                        и почему не работает без неё?
 
 -- 4. Докажите, что 0 не равно suc x.
 
-\func zero/=suc (x : Nat) (p : 0 = suc x) : Empty => {?}
+\func zero/=suc (x : Nat) (p : 0 = suc x) : Empty
+  => absurd (transport Fin (sym p) fzero)
+
+\data Fin (n : Nat) \with
+  | suc n => { fzero | fsuc (Fin n) }
+
+\func absurd {A : \Type} (x : Fin 0) : A
 
 -- 5. Докажите, что fac не равен suc.
 
@@ -38,4 +98,8 @@
   | 0 => 1
   | suc n => suc n * fac n
 
-\func fac/=suc (p : fac = suc) : Empty => {?}
+\func one/=two (p : 1 = 2) : Empty
+  => {?}
+
+\func fac/=suc (p : fac = suc) : Empty
+  => one/=two (pmap (\lam f => f 1) p)
