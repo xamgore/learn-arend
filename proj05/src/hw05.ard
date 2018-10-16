@@ -73,6 +73,8 @@
 
 -- 3. Докажите, что vnil является нейтральным элементом для v++.
 
+\func vnil-rightId {A : \Type} {n : Nat} (xs : Vec A n) : transport (Vec A) (+-comm 0 n) (xs v++ vnil) = xs => {?}
+
 --\func vnil-rightId {A : \Type} {n : Nat} (xs : Vec A n)
 --  : transport (Vec A) (+-comm 0 n) (xs v++ vnil) = xs \elim n, xs
 --  | 0,     vnil       => idp
@@ -83,7 +85,7 @@
 ----                    transport (Vec A) (pmap suc p) (vcons x (xs v++ (ys v++ zs))))
 --      ) idp (+-comm 0 n)
 
--- Q: а почему J не доказан? О_о, 
+-- Q: а почему J не доказан? О_о,
 -- A: Я не стал выписывать доказательство на лекции. Сейчас добавил его.
 
 -- Q: и почему без его определения пруфается v++-assoc из лекции?
@@ -119,3 +121,21 @@
 
 \func fac/=suc (p : fac = suc) : Empty
   => one/=two (pmap (\lam f => f 1) p)
+
+--\func fac/=0 (x : Nat) (p : fac x = 0) : Empty
+--  =>
+
+
+-- 6. У оператора J есть другая форма, которую мы будем называть Jalt. Докажите, что J и Jalt эквивалентны, то есть выразите одно через другое и наоборот.
+
+-- Выразите Jalt через J. Можно пользоваться только J, idp и всем, что через них выражается.
+
+\func Jalt {A : \Type} (B : \Pi (a a' : A) -> a = a' -> \Type)
+    (b : \Pi (a : A) -> B a a idp)
+    {a a' : A} (p : a = a') : B a a' p => {?}
+
+-- Выразите J через Jalt. Можно пользоваться только Jalt, idp и всем, что через них выражается.
+
+\func J' {A : \Type} {a : A} (B : \Pi (a' : A) -> a = a' -> \Type)
+    (b : B a idp)
+    {a' : A} (p : a = a') : B a' p => {?}
