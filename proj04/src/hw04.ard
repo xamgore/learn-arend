@@ -57,8 +57,26 @@
 
 -- то есть надо показать, что coe = coe0?
 -- Да.
+
+-- todo: coe -> transport -> coe0
+-- coe0 A a == transport A left=right           a
+--          == transport A (path (\lam i => i)) a ==
+--    == coe (\lam i => A ((path (\lam x => x)) @ i)) a right
+--    == coe (\lam i => A i                         ) a right
+--    == coe A a right
+
 -- и что имелось в виду под "в обратную сторону"?
 -- Если мы построим coe0 по transport, а потом transport по coe0 то получим исходный coe0.
+
+-- todo: transport -> coe0 -> transport0
+-- transport0 B p a == coe0 (\lam i => B (p @ i)) a
+--             == transport (\lam i => B (p @ i)) left=right a
+--             == transport (\lam i => B (p @ i)) (path (\lam i => i)) a
+--             == coe (\lam i => (\lam i => B (p @ i)) ((path (\lam i => i)) @ i)) a right
+--             == coe (\lam i => (\lam i => B (p @ i)) i                         ) a right
+--             == coe (\lam i => B (p @ i)) a right
+--             == transport B p a
+
 
 -- 8. Определите функцию B right -> B left.
 
