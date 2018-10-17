@@ -31,6 +31,7 @@
 --    + x y -- это просто аппликация + к x и y.
 --    + x -- это частичное применение, то есть эквивалентно \lam t => x + t.
 
+
 -- 2. Докажите, что reverse (reverse xs) = xs, где reverse определен через ++.
 
 \data List (A : \Type) | nil | cons A (List A)
@@ -55,11 +56,10 @@
 -- Это утверждение будет полезно для доказательства.
 -- reverse (x : xs ++ ys) ==> reverse (xs ++ ys) ++ [x] <=> (reverse ys ++ reverse xs) ++ [x]
 --   <== reverse (y:ys) ++ (reverse xs ++ [x]) <== reverse (y:ys) ++ reverse (x:xs)
-\func reverse++ {A : \Type} (xs ys : List A) : reverse (xs ++ ys) = reverse ys ++ reverse xs \elim xs, ys
-  | nil, nil             => idp
-  | nil, cons y ys       => ++-nil (reverse ys ++ cons y nil)
-  | cons x xs, ys        => pmap (\lam t => t ++ cons x nil) (reverse++ xs ys)
-                              *> ++-assoc (reverse ys) (reverse xs) (cons x nil)
+\func reverse++ {A : \Type} (xs ys : List A) : reverse (xs ++ ys) = reverse ys ++ reverse xs \elim xs
+  | nil       => ++-nil (reverse ys)
+  | cons x xs => pmap (\lam t => t ++ cons x nil) (reverse++ xs ys)
+                   *> ++-assoc (reverse ys) (reverse xs) (cons x nil)
 
 -- reverse (reverse x : xs) ==> reverse (reverse xs ++ [x]) ==> reverse [x] ++ reverse (reverse xs)
 --   => [x] ++ xs => x : xs
@@ -73,32 +73,15 @@
 
 -- 3. Докажите, что vnil является нейтральным элементом для v++.
 
-\func vnil-rightId {A : \Type} {n : Nat} (xs : Vec A n) : transport (Vec A) (+-comm 0 n) (xs v++ vnil) = xs => {?}
+\func vnil-rightId {A : \Type} {n : Nat} (xs : Vec A n)
+  : transport (Vec A) (+-comm 0 n) (xs v++ vnil) = xs \elim n, xs
+    | 0, vnil           => idp
+    | suc n, vcons x xs =>
+      \let typesEq e (p : 0 + n = e) =>
+                 transport (Vec A) (pmap suc p) (vcons x (xs v++ vnil)) =
+        vcons x (transport (Vec A)           p           (xs v++ vnil))
+        \in J typesEq idp (+-comm 0 n) *> pmap (vcons x) (vnil-rightId xs)
 
---\func vnil-rightId {A : \Type} {n : Nat} (xs : Vec A n)
---  : transport (Vec A) (+-comm 0 n) (xs v++ vnil) = xs \elim n, xs
---  | 0,     vnil       => idp
---  | suc n, vcons x xs => pmap (vcons x) (vnil-rightId xs) *>
---      J (\lam e (p : 0 + n = e) =>
---                  {?}
-----                    vcons x (transport (Vec A) p (xs v++ (ys v++ zs))) =
-----                    transport (Vec A) (pmap suc p) (vcons x (xs v++ (ys v++ zs))))
---      ) idp (+-comm 0 n)
-
--- Q: а почему J не доказан? О_о,
--- A: Я не стал выписывать доказательство на лекции. Сейчас добавил его.
-
--- Q: и почему без его определения пруфается v++-assoc из лекции?
--- A: А почему не должно? Если я определю некоторое утверждение без реализации, я вполне могу его использовать. Если, конечно, реализация не важна.
-
--- Q: где вообще можно про этот J почитать? как он работает?
--- A: В the HoTT book неплохо написано. Раздел 1.12.
-
--- Q: почему мы пишем ту муть в v++-assoc?
--- A: Я вроде как на лекции объяснял. Я еще комментарий добавил в файл лекции.
-
--- Q: и почему не работает без неё?
--- A: А как оно должно без нее работать?
 
 -- 4. Докажите, что 0 не равно suc x.
 
@@ -110,32 +93,55 @@
 
 \func absurd {A : \Type} (x : Fin 0) : A
 
+
 -- 5. Докажите, что fac не равен suc.
 
 \func fac (n : Nat) : Nat
   | 0 => 1
   | suc n => suc n * fac n
 
+\func ==1 (n : Nat) : \Type
+  | 1 => \Sigma
+  | _ => Empty
+
+\func absurd' {A : \Type} (e : Empty) : A
+
 \func one/=two (p : 1 = 2) : Empty
-  => {?} -- А где доказательство?
+  => absurd' (transport ==1 p ())
 
 \func fac/=suc (p : fac = suc) : Empty
   => one/=two (pmap (\lam f => f 1) p)
 
---\func fac/=0 (x : Nat) (p : fac x = 0) : Empty
---  =>
+-- TODO:
+--  0.   Вот можно определить аксиому (отсутствие док-ва),
+--     а можно сказать, что что-то точно ложь (принять фигню, вернуть Empty)
+--
+--       А можно ли объединить эти два подхода, чтобы для каких-то входных данных
+--     результат аксиома, а для остальных -- ложь?
+--
+--  1. Как определить аксиому, которая принимает (n m : Nat) и возвращает n = m,
+--       только если n == m в вычислительном смысле? (рекурсивная функция)
+--
+--  2. Есть ли способ пруфануть one/=two без дополнительного типа данных или функции как выше?
+--       Здесь выглядит несколько наигранно, что мы по сути сами сказали, что ==1 -- аксиома
+--       Кажется, было бы прикольно использовать аксиому из пункта 1.
+--
+--  3. как доказать, что вообще все числа различны? (1 != 2, 1 != 3, 2 != 3, итд)
+--     то есть обобщить one/=two
 
 
 -- 6. У оператора J есть другая форма, которую мы будем называть Jalt. Докажите, что J и Jalt эквивалентны, то есть выразите одно через другое и наоборот.
 
 -- Выразите Jalt через J. Можно пользоваться только J, idp и всем, что через них выражается.
 
-\func Jalt {A : \Type} (B : \Pi (a a' : A) -> a = a' -> \Type)
-    (b : \Pi (a : A) -> B a a idp)
-    {a a' : A} (p : a = a') : B a a' p => {?}
+\func Jalt {A : \Type} (B : \Pi (l r : A) -> l = r -> \Type)
+    (b : \Pi (x : A) -> B x x idp)
+    {a a' : A} (p : a = a') : B a a' p => J (B a) (b a) p
 
 -- Выразите J через Jalt. Можно пользоваться только Jalt, idp и всем, что через них выражается.
 
-\func J' {A : \Type} {a : A} (B : \Pi (a' : A) -> a = a' -> \Type)
+\func J' {A : \Type} {a : A} (B : \Pi (r : A) -> a = r -> \Type)
     (b : B a idp)
-    {a' : A} (p : a = a') : B a' p => {?}
+    {a' : A} (p : a = a') : B a' p
+      => Jalt (\lam x y p' => \Pi (C : \Pi (r : A) -> x = r -> \Type) -> C x idp -> C y p')
+                (\lam _ _ z => z) {a} {a'} p B b
