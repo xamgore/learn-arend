@@ -4,6 +4,8 @@
 \func \infixr 1 >>= => (>==)
 \func \infix 2 =<< => (==<)
 
+\func transport {A : \Type} (B : A -> \Type) {a a' : A} (p : a = a') (b : B a) : B a'
+  => coe (\lam i => B (p @ i)) b right
 
 -- 1. Докажите дистрибутивность умножения над сложением для натуральных чисел.
 
