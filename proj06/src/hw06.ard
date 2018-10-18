@@ -1,33 +1,81 @@
 \import lect06
 
+
 -- 1. Определите функцию swap при помощи \cowith, swap' при помощи паттерн матчинг и swap'' при помощи \new.
 
-\func swap {A B : \Type} (p : Pair A B) : Pair B A => {?}
+\func swap {A B : \Type} (p : Pair A B) : Pair B A \cowith
+  | fst_ => p.snd_
+  | snd_ => p.fst_
 
-\func swap' {A B : \Type} (p : Pair A B) : Pair B A => {?}
+--\func swap' {A B : \Type} (p : Pair A B) : Pair B A \elim p
+--  | (a, b, f, s) => \new Pair b a { | fst_ => s | snd_ => f }
 
-\func swap'' {A B : \Type} (p : Pair A B) : Pair B A => {?}
+\func swap'' {A B : \Type} (p : Pair A B) : Pair B A
+  => \new Pair B A { | fst_ => p.snd_ | snd_ => p.fst_ }
+
 
 -- 2. Докажите, что swap (swap p) = p.
 
-\func swap-involutive {A B : \Type} (p : Pair A B) : swap (swap p) = p => {?}
+\func swap-involutive {A B : \Type} (p : Pair A B) : swap (swap p) = p
+  => idp
+
 
 -- 3. Докажите, что тип PosNat 0 пустой, а тип PosNat 1 нет.
 
 \data Empty
 
-\func zero-isNotPos (p : PosNat 0) : Empty => {?}
+\func zero-isNotPos (p : PosNat 0) : Empty
+  => \case (p.p) \with {}
 
-\func one-isPos : PosNat 1 => {?}
+\func one-isPos : PosNat 1
+  => \new PosNat 1 tt
+
 
 -- 4. Определите \record, состоящий из пар взаимно простых натуральных чисел.
 --    Определите тип, состоящий из натуральных чисел, взаимно простых с 60.
 
+\import Nat' (gcd, NatEq)
+\import Bool' (Bool, Eq, true, false)
+
+\record Coprime (n m : Nat) (p : T (gcd m n Eq.== 1))
+
+\func Coprime60 => Coprime 60
+
+-- todo: или должно работать что-то такое? если так то хз как делать
+-- \func test : Coprime60 => 7
+
+
 -- 5. Определите класс монад, который наследует класс функторов. Определите \instance этого класса для Maybe.
 
-\data Maybe (A : \Type) | nothing | just A
+\class Monad \extends Functor
+  | unit {A : \Type} : A -> F A
+  | unit-comp {A B : \Type} (f : A -> B) (x : A)
+    : unit (f x) = fmap f (unit x)
+  | join {A : \Type} (ffa : F (F A)) : F A
+  | join-id {A : \Type} (x : F A)
+    : join (fmap unit x) = x
+  | join-twice {A : \Type} (x : F (F (F A)))
+    : join (fmap join x) = join (join x)
+  | join-fmap {A B : \Type} (f : A -> B) (x : F (F A))
+    : join (fmap (fmap f) x) = (fmap f) (join x)
+
+
+\import Maybe()
+
+\instance MaybeMonad : Monad Maybe.Maybe {
+  | fmap => Maybe.fmap
+  | unit => Maybe.just
+  | join => Maybe.join
+  | fmap-id => Maybe.fmap-id
+  | fmap-comp => Maybe.fmap-comp
+  | unit-comp => Maybe.unit-comp
+  | join-id => Maybe.join-id
+  | join-twice => Maybe.join-twice
+  | join-fmap => Maybe.join-fmap
+}
+
 
 -- 6. Для списков есть два разных инстанса класса Monad.
 --    Определите синоним для этого класса и определите эти два инстанса.
 
-\data List (A : \Type) | nil | cons A (List A)
+\import List()

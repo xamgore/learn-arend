@@ -89,7 +89,7 @@
 
 -- 6. Dependent records, тип положительных натуральных чисел.
 
-\data Bool | true | false
+\import Bool' (Bool, false, true)
 
 \data T (b : Bool) \with
   | true => tt
@@ -183,14 +183,14 @@
 -- * {M : Monoid} (x y : M.A) : M.A
 \func f (x y : Nat) => x * y
 
-\class Eq (A : \Type)
-  | \infix 3 == (x y : A) : Bool
-
--- refl :: Eq a => a -> Bool
--- refl x = x == x
-\func refl {A : \Type} {e : Eq A} (a : A) => a == a
-
-\func refl' {E : Eq} (a : E) => a == a
+--\class Eq (A : \Type)
+--  | \infix 3 == (x y : A) : Bool
+--
+---- refl :: Eq a => a -> Bool
+---- refl x = x == x
+--\func refl {A : \Type} {e : Eq A} (a : A) => a == a
+--
+--\func refl' {E : Eq} (a : E) => a == a
 
 -- 12. Синонимы классов.
 

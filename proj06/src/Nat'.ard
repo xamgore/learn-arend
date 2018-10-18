@@ -1,0 +1,40 @@
+\import Bool'
+
+\instance NatEq : Eq Nat {
+  | == => equals
+}
+
+
+\func \infix 4 < (x y : Nat) : Bool
+  | 0, 0 => false
+  | 0, suc y => true
+  | suc x, 0 => false
+  | suc x, suc y => x < y
+
+
+\func equals (x y : Nat) : Bool
+  | suc x, suc y => x `equals` y
+  | 0,     0     => true
+  | _,     _     => false
+
+
+\func \infixl 6 - (x y : Nat) : Nat
+  | 0, _ => 0
+  | suc x, 0 => suc x
+  | suc x, suc y => x - y
+
+
+\func \infix 5 mod (x y : Nat) => mod' x x y \where
+  \func mod' (s x y : Nat) : Nat \elim s
+    | 0     => x
+    | suc s => if (x < y) x (mod' s (x - y) y)
+
+
+\func gcd (x y : Nat) : Nat => if (y < x) (gcd' x x y) (gcd' y y x) \where
+  -- a >= b
+  \func gcd' (s a b : Nat) : Nat \elim s
+    | 0     => a
+    | suc s => \case b \with {
+      | 0       => a
+      | b => gcd' s b (a mod b)
+    }
