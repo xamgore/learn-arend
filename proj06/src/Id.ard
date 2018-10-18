@@ -20,6 +20,9 @@
 \func \infixr 5 *> {A : \Type} {a a' a'' : A} (p : a = a') (q : a' = a'') : a = a''
   => transport (\lam x => a = x) q p
 
+\func \infixr 5 <* {A : \Type} {a' a'' a : A} (q : a' = a) (p : a' = a'') : a = a''
+  => transport (\lam x => x = a'') q p
+
 \func \infix 2 qed {A : \Type} (a : A) : a = a => idp
 
 \func \infixr 1 >== {A : \Type} {a a' a'' : A} (p : a = a') (q : a' = a'') => p *> q

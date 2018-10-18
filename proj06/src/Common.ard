@@ -1,1 +1,3 @@
 \func \infixr 1 $ {A B : \Type} (f : A -> B) (x : A) : B => f x
+
+--\func \infixr 9 o {A B C : \Type} (g : B -> C) (f : A -> B) (x : A) : C => g (f x)

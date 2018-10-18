@@ -1,12 +1,17 @@
 \import Common ($)
-\import lect06
+\import Id (*>, idp, pmap, sym)
 
 
 \data List (A : \Type) | nil | cons A (List A)
 
+
 \func \infixl 4 ++ {A : \Type} (xs ys : List A) : List A \elim xs
-  | nil => ys
+  | nil       => ys
   | cons x xs => cons x $ xs ++ ys
+
+\func ++-assoc {A : \Type} (xs ys zs : List A) : (xs ++ ys) ++ zs = xs ++ (ys ++ zs) \elim xs
+  | nil       => idp
+  | cons x xs => pmap (cons x) (++-assoc xs ys zs)
 
 
 -- fmap
@@ -20,9 +25,13 @@
     | cons x xs => pmap (cons x) $ fmap-id xs
 
 \func fmap-comp {A B C : \Type} (f : A -> B) (g : B -> C) (xs : List A)
-  : fmap g (fmap f xs) = fmap (\lam x => g (f x)) xs \elim xs
+  : fmap (\lam x => g (f x)) xs = fmap g (fmap f xs) \elim xs
     | nil       => idp
     | cons y ys => pmap (cons $ g $ f y) $ fmap-comp f g ys
+
+\func fmap-++ {A B : \Type} (f : A -> B) (xs ys : List A) : fmap f xs ++ fmap f ys = fmap f (xs ++ ys) \elim xs
+  | nil       => idp
+  | cons x xs => pmap (cons $ f x) $ fmap-++ f xs ys
 
 
 -- unit
@@ -39,14 +48,18 @@
 
 \func join-id {A : \Type} (xs : List A) : join (fmap unit xs) = xs \elim xs
   | nil       => idp
-  | cons x xs => pmap (cons x) (join-id xs)
+  | cons x xs => pmap (cons x) $ join-id xs
+
+\func join-++ {A : \Type} (xss yss : List (List A)) : join xss ++ join yss = join (xss ++ yss) \elim xss
+  | nil         => idp
+  | cons xs xss => ++-assoc xs (join xss) (join yss) *> pmap (xs ++) (join-++ xss yss)
 
 \func join-twice {A : \Type} (xss : List (List (List A)))
   : join (fmap join xss) = join (join xss) \elim xss
     | nil         => idp
-    | cons xs xss => {?}
+    | cons xs xss => pmap ((join xs) ++) (join-twice xss) *> join-++ xs (join xss)
 
-\func join-fmap {A B : \Type} (f : A -> B) (x : List (List A))
-  : join (fmap (fmap f) x) = (fmap f) (join x) \elim x
-    | nil => idp
-    | cons x xs  => {?}
+\func join-fmap {A B : \Type} (f : A -> B) (xss : List (List A))
+  : join (fmap (fmap f) xss) = (fmap f) (join xss) \elim xss
+    | nil         => idp
+    | cons xs xss => pmap ((fmap f xs) ++) (join-fmap f xss) *> fmap-++ f xs (join xss)

@@ -1,3 +1,4 @@
+\import Common
 \import lect06
 
 
@@ -35,9 +36,9 @@
 --    Определите тип, состоящий из натуральных чисел, взаимно простых с 60.
 
 \import Nat' (gcd, NatEq)
-\import Bool' (Bool, Eq, true, false)
+\import Bool' (Bool, ==, true, false)
 
-\record Coprime (n m : Nat) (p : T (gcd m n Eq.== 1))
+\record Coprime (n m : Nat) (p : T (gcd m n == 1))
 
 \func Coprime60 => Coprime 60
 
@@ -60,22 +61,37 @@
     : join (fmap (fmap f) x) = (fmap f) (join x)
 
 
-\import Maybe()
+\import Maybe'()
 
-\instance MaybeMonad : Monad Maybe.Maybe {
-  | fmap => Maybe.fmap
-  | unit => Maybe.just
-  | join => Maybe.join
-  | fmap-id => Maybe.fmap-id
-  | fmap-comp => Maybe.fmap-comp
-  | unit-comp => Maybe.unit-comp
-  | join-id => Maybe.join-id
-  | join-twice => Maybe.join-twice
-  | join-fmap => Maybe.join-fmap
+\instance MaybeMonad : Monad Maybe'.Maybe {
+  | fmap => Maybe'.fmap
+  | unit => Maybe'.just
+  | join => Maybe'.join
+  | fmap-id => Maybe'.fmap-id
+  | fmap-comp => Maybe'.fmap-comp
+  | unit-comp => Maybe'.unit-comp
+  | join-id => Maybe'.join-id
+  | join-twice => Maybe'.join-twice
+  | join-fmap => Maybe'.join-fmap
 }
 
 
 -- 6. Для списков есть два разных инстанса класса Monad.
 --    Определите синоним для этого класса и определите эти два инстанса.
 
-\import List()
+\import List'()
+
+\instance ListMonad : Monad List'.List {
+  | fmap => List'.fmap
+  | unit => List'.unit
+  | join => List'.join
+  | fmap-id => List'.fmap-id
+  | fmap-comp => List'.fmap-comp
+  | unit-comp => List'.unit-comp
+  | join-id => List'.join-id
+  | join-twice => List'.join-twice
+  | join-fmap => List'.join-fmap
+}
+
+-- todo: а какой второй-то? о_О
+-- с эффектом reverse не подходит, ZipList аппликатив
