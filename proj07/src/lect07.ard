@@ -209,13 +209,21 @@
 
 -- 8. Разрешимое равенство.
 
-\func pmap {A B : \Type} (f : A -> B) {a a' : A} (p : a = a') => path (\lam i => f (p @ i))
+\func pmap {A B : \Type} (f : A -> B) {a a' : A} (p : a = a') : f a = f a' => path (\lam i => f (p @ i))
 
-\func transport {A : \Type} (B : A -> \Type) {a a' : A} (p : a = a') (b : B a) => coe (\lam i => B (p @ i)) b right
+\func transport {A : \Type} (B : A -> \Type) {a a' : A} (p : a = a') (b : B a) : B a' => coe (\lam i => B (p @ i)) b right
 
 \func suc/=0 {n : Nat} (p : suc n = 0) : Empty => transport (\lam n => \case n \with { | 0 => Empty | suc _ => Unit }) p unit
 
-\func sym {A : \Type} {a a' : A} (p : a = a') => transport (\lam x => x = a) p idp
+\func sym {A : \Type} {a a' : A} (p : a = a') : a' = a => transport (\lam x => x = a) p idp
+
+\func trans {A : \Type} {a a' a'' : A} (p : a = a') (q : a' = a'') : a = a''
+  => transport (\lam x => a = x) q p
+
+\func \infixr 5 *> {A : \Type} {a a' a'' : A} (p : a = a') (q : a' = a'') : a = a''
+  => transport (\lam x => a = x) q p
+
+
 
 -- DecEq A верно в точности тогда, когда предикат равенства на A разрешим.
 \func DecEq (A : \Type) => \Pi (a a' : A) -> Decide (a = a')

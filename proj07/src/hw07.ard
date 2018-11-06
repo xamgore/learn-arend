@@ -1,25 +1,88 @@
-\import lect07
+\import Bool' (if, Bool, true, false)
+\import Common
+\import lect07 \hiding (Bool, true, false)
 \open Nat
 
+
 -- 1. Реализуйте любой алгоритм сортировки, используя with для паттерн матчинга на результате сравнения элементов списка.
+\func sort {A : \Type} (less : A -> A -> Bool) (xs : List A) : List A \elim xs
+  | nil => nil
+  | cons x xs => insert less x (sort less xs)
+  \where
+    \func insert {A : \Type} (less : A -> A -> Bool) (x : A) (xs : List A) : List A \elim xs
+      | nil => cons x nil
+      | cons x' xs => \case less x x' \with {
+        | true  => cons x  $ cons x' xs
+        | false => cons x' $ insert less x xs
+      }
+
 
 -- 2. Определите filter через if, а не через with.
 --    Докажите для этой версии filter лемму filter-lem.
 
-\func filter' {A : \Type} (p : A -> Bool) (xs : List A) : List A => {?}
+\func filter' {A : \Type} (p : A -> Bool) (xs : List A) : List A \elim xs
+  | nil       => nil
+  | cons x xs => if (p x) (cons x $ filter' p xs) (filter' p xs)
 
-\func filter-lem {A : \Type} (p : A -> Bool) (xs : List A) : length (filter' p xs) <= length xs => {?}
+\func filter-lem' {A : \Type} (p : A -> Bool) (xs : List A) : length (filter' p xs) <= length xs \elim xs
+  | nil       => unit
+  | cons x xs =>
+  \case p x \as b \return length (if b (cons x $ filter' p xs) (filter' p xs)) <= suc (length xs)
+    \with {
+    | true  => filter-lem' p xs
+    | false => <=-helper $ filter-lem' p xs
+  }
+
 
 -- 3. Докажите, что если равенство элементов A разрешимо, то и равенство элементов List A тоже разрешимо.
 
+\func cons/=nil {A : \Type} {x : A} {xs : List A} (p : cons x xs = nil) : Empty
+  => transport (\lam xs => \case xs \with { | nil => Empty | cons _ _ => Unit }) p unit
+
+\func headOrDefault {A : \Type} (def : A) (xs : List A) : A \elim xs
+  | nil      => def
+  | cons x _ => x
+
+\func tail {A : \Type} (xs : List A) : List A \elim xs
+  | nil       => nil
+  | cons _ xs => xs
+
 \instance ListEq {A : \Type} (dec : Eq A) : Eq (List A)
-  | decideEq => {?}
+  | decideEq => decideEq
+  \where
+    \func decideEq {A : \Type} {dec : Eq A} (xs ys : List A) : Decide (xs = ys) \elim xs, ys
+      | nil,      nil        => yes idp
+      | nil,      cons _ _   => no (\lam p => cons/=nil (sym p))
+      | cons _ _, nil        => no cons/=nil
+      | cons x xs, cons y ys => \case dec.decideEq x y \with {
+        | no  c => no (\lam p => c $ pmap (headOrDefault x) p)
+        | yes p => \case decideEq {A} {dec} xs ys \with {
+          | yes ps => yes $ path (\lam i => cons (p @ i) (ps @ i))
+          | no  cs => no (\lam ps => cs $ pmap tail ps)
+        }
+      }
+
 
 -- 4. Докажите, что предикат isEven разрешим.
 
+\func \infixr 5 <* {A : \Type} {a' a'' a : A} (q : a' = a) (p : a' = a'') : a = a''
+  => transport (\lam x => x = a'') q p
+
+\func \infixr 9 o {A B C : \Type} (g : B -> C) (f : A -> B) (x : A) : C => g (f x)
+
+\func kek-fact {n k : Nat} (p : 2 * n = suc (2 * k)) : Empty \elim n, k
+  | 0,     _     => suc/=0 (sym p)
+  | suc n, 0     => suc/=0 (pmap pred p)
+  | suc n, suc k => kek-fact (pmap (pred o pred) p)
+
 \func isEven (n : Nat) => \Sigma (k : Nat) (n = 2 * k)
 
-\func isEven-dec : DecPred isEven => {?}
+\func isEven-dec : DecPred isEven => \lam n =>
+  \case parity n \with {
+    | even k p => yes (k, p)
+    | odd  k p => no (\lam pair => kek-fact (pair.2 <* p))
+  }
+
 
 -- 5. Докажите, что если равенство элементов A разрешимо, то любой список элементов A либо пуст, либо состоит из повторений одного элемента, либо в A существует два различных элемента.
 
@@ -32,7 +95,18 @@
   | repeated (n : Nat) (a : A) (p : xs = repeat n a)
   | A-is-not-trivial (a a' : A) (p : a = a' -> Empty)
 
-\func lemma {A : \Type} (xs : List A) {dec : DecEq A} : Result A xs => {?}
+\func lemma {A : \Type} (xs : List A) {dec : DecEq A} : Result A xs \elim xs
+  | nil       => empty idp
+  | cons x xs => \case lemma {A} xs {dec} \with {
+    | empty            p      => repeated 1 x (pmap (cons x) p)
+    | A-is-not-trivial a a' p => A-is-not-trivial a a' p
+    | repeated         n a p  => \case dec x a \with {  -- todo: if write decideEq instead of dec
+                                                        --       "cannot infer instance of decideEq"
+      | yes t => repeated (suc n) a (path (\lam i => cons (t @ i) (p @ i)))
+      | no  c => A-is-not-trivial x a c
+    }
+  }
+
 
 -- 6. Определите view, представляющий число в виде частного и остатка от деления его на произвольное (неотрицательное) число m.
 --    Реализуйте функцию деления.
@@ -44,9 +118,10 @@
 
 \func div (n m : Nat) (t : T (0 < m)) : Nat => {?}
 
+
 -- 7. Докажите, что функции FromBoolToDec и FromDecToBool взаимно обратны.
 
-\func bdb {A : \Type} (p : A -> Bool) : FromDecToBool (FromBoolToDec p) = p => {?}
+--\func bdb {A : \Type} (p : A -> Bool) : FromDecToBool (FromBoolToDec p) = p => {?}
 
 -- Мы не можем доказать, что FromBoolToDec (FromDecToBool P) = P, но мы можем доказать более слабое утверждение: эти предикаты логически эквивалентны.
 -- Для этого введем эквивалентность предикатов.
