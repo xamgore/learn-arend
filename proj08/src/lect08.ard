@@ -1,3 +1,4 @@
+\import hw08
 \open Nat
 
 -- 1. Вселенные, полиморфизм по уровням.
@@ -35,6 +36,7 @@
 \func test1 => id Nat 0
 \func test2 => id \Type0 Nat
 \func test3 => id (\Type0 -> \Type1) (\lam X => X)
+-- todo: почему нет параметра? где ещё так легально писать? оО
 \func test4 => id _ id
 \func test4' => id (\Pi (A : \Type) -> A -> A) id
 
@@ -116,4 +118,9 @@
 -- Третье индуктивное определение <=
 \data LessOrEq'' (n m : Nat) \elim m
   | suc m => <=-step (LessOrEq'' n m)
-  | m => <=-refl (n = m)
+  |     m => <=-refl (n = m)
+
+\func idp {A : \Type} {a : A} : a = a => path (\lam _ => a)
+
+\func test31 : LessOrEq'' 3 5 => <=-step (<=-step (<=-refl (idp : 3 = 3)))
+\func test32 : LessOrEq'' 0 5 => <=-step $ <=-step $ <=-step $ <=-step $ <=-step $ <=-refl (idp : 0 = 0)
