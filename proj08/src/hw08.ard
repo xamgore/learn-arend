@@ -29,6 +29,7 @@
 
 \func id' {A : \Type} (a : A) => a
 
+-- Почему уровни в типах функций все константные? Это неправильно.
 \func idTest1 : \Pi (A : \Type 0) -> A -> A => id' (\suc \lp) (id' (\suc \lp) id)
 \func idTest2 : \Type 0 -> \Type 0          => id' (\suc \lp) Maybe
 \func idTest3 : \Type 1                     => id' (\suc (\suc \lp)) Functor
