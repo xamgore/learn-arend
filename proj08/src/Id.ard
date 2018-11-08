@@ -1,0 +1,52 @@
+\func idp {A : \Type} {a : A} : a = a
+  => path (\lam _ => a)
+
+\func pmap {A B : \Type} (f : A -> B) {a a' : A} (p : a = a') : f a = f a'
+  => path (\lam i => f (p @ i))
+
+\func pmap2 {A B C : \Type} (f : A -> B -> C) {a a' : A} (p : a = a') {b b' : B} (q : b = b') : f a b = f a' b'
+  => path (\lam i => f (p @ i) (q @ i))
+
+\func transport {A : \Type} (B : A -> \Type) {a a' : A} (p : a = a') (b : B a) : B a'
+  => coe (\lam i => B (p @ i)) b right
+
+-- Симметричность
+\func sym {A : \Type} {a a' : A} (p : a = a') : a' = a
+  => transport (\lam x => x = a) p idp
+
+-- Транзитивность
+\func trans {A : \Type} {a a' a'' : A} (p : a = a') (q : a' = a'') : a = a''
+  => transport (\lam x => a = x) q p
+
+
+-- Equational reasoning
+\func \infixr 5 *> {A : \Type} {a a' a'' : A} (p : a = a') (q : a' = a'') : a = a''
+  => transport (\lam x => a = x) q p
+
+\func \infixr 5 <* {A : \Type} {a' a'' a : A} (q : a' = a) (p : a' = a'') : a = a''
+  => transport (\lam x => x = a'') q p
+
+\func \infix 2 qed {A : \Type} (a : A) : a = a => idp
+
+\func \infixr 1 >== {A : \Type} {a a' a'' : A} (p : a = a') (q : a' = a'') => p *> q
+
+\func \infixr 1 >- => (>==)
+
+\func \infix 2 ==< {A : \Type} (a : A) {a' : A} (p : a = a') => p
+
+\func \infix 2 -< => (==<)
+
+
+
+\func J
+    {A : \Type} {a : A}
+    (B : \Pi (a' : A) -> a = a' -> \Type)
+    (b : B a idp)
+    {a' : A} (p : a = a')
+    : B a' p
+  => coe (\lam i => B (p @ i) (psqueeze p i)) b right
+  \where {
+    \func squeeze (i j : I) => coe (\lam i => Path (\lam j => left = squeeze1 i j) (path (\lam _ => left)) (path (\lam j => squeeze1 i j))) (path (\lam _ => path (\lam _ => left))) right @ i @ j
+    \func squeeze1 (i j : I) => coe (\lam x => left = x) (path (\lam _ => left)) j @ i
+    \func psqueeze  {A : \Type} {a a' : A} (p : a = a') (i : I) : a = p @ i => path (\lam j => p @ squeeze i j)
+  }

@@ -1,0 +1,28 @@
+\data Bool | true | false
+
+
+\func not (x : Bool) : Bool
+  | true => false
+  | false => true
+
+\func \infixr 4 && (x y : Bool) : Bool \elim x
+  | true => y
+  | false => false
+
+\func \infixr 3 || (x y : Bool) : Bool => if x true y
+
+\func if {A : \Type} (clause : Bool) (then else : A) : A \elim clause
+  | true => then
+  | false => else
+
+
+\class Eq (A : \Type)
+  | \infix 2 == (x y : A) : Bool
+
+\func \infix 2 /= {A : Eq} (x y : A) : Bool
+  => not (x == y)
+
+
+-- refl :: Eq a => a -> Bool
+-- refl x = x == x
+--\func refl {E : Eq} (a : E) => a == a

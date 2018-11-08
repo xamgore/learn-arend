@@ -1,23 +1,92 @@
+\import Id (*>, <*, pmap, pmap2, sym, transport)
 \import lect08
+
+\func \infixr 1 $ {A B : \Type} (f : A -> B) (x : A) : B => f x
+
+\func absurd {A : \Type} (e : Empty) : A
+
+\func suc/=0 {n : Nat} (p : suc n = 0) : Empty => transport (\lam n => \case n \with { | 0 => Empty | suc _ => Unit }) p unit
+
+\open Nat (+)
+
+\func suc-+ (n m : Nat) : suc n + m = suc (n + m) =>
+  +-comm m (suc n) <* pmap suc (+-comm m n)
+
+\func pred (n : Nat) : Nat
+  | 0 => 0
+  | suc n => n
+
+\func +-comm (n m : Nat) : n Nat.+ m = m Nat.+ n
+  | 0, 0 => idp
+  | 0, suc m => pmap suc (+-comm 0 m)
+  | suc n, 0 => pmap suc (+-comm n 0)
+  | suc n, suc m => pmap suc (+-comm (suc n) m *> pmap suc (sym (+-comm n m)) *> +-comm n (suc m))
+
+
 
 -- 1. Укажите явно чему равен уровень в каждом из вызовов id' ниже.
 --    Напишите явно чему равны типы всех функций idTest*.
 
 \func id' {A : \Type} (a : A) => a
 
-\func idTest1 => id' (id' id)
-\func idTest2 => id' Maybe
-\func idTest3 => id' Functor
-\func idTest4 => id' (Functor Maybe)
-\func idTest5 (f : \Pi {A B : \Type} -> (A -> B) -> Maybe A -> Maybe B) => id' (Functor Maybe f)
+\func idTest1 : \Pi (A : \Type 0) -> A -> A => id' (\suc \lp) (id' (\suc \lp) id)
+\func idTest2 : \Type 0 -> \Type 0          => id' (\suc \lp) Maybe
+\func idTest3 : \Type 1                     => id' (\suc (\suc \lp)) Functor
+\func idTest4 : \Type 1                     => id' (\suc (\suc \lp)) (Functor Maybe)
+\func idTest5 (f : \Pi {A B : \Type} -> (A -> B) -> Maybe A -> Maybe B)
+              : \Type 0                     => id' (\suc \lp) (Functor Maybe f)
 
 -- 2. Определите предикат принадлежности элемента списку.
 
 \data List (A : \Type) | nil | cons A (List A)
 
-\data In {A : \Type} (a : A) (xs : List A)
+\data In {A : \Type} (a : A) (xs : List A) \elim xs
+  | cons x xs => {
+    | isIn (x = a)
+    | miss (In a xs)
+  }
+
+\func testIn : In 2 (cons 1 $ cons 2 $ cons 3 nil) => miss $ isIn idp
 
 -- 3. Докажите эквивалентность пяти различных определений LessOrEq: lessOrEq, LessOrEq, LessOrEq', LessOrEq'' и LessOrEq'''.
+
+-- loe -> Loe -> Loe' <?> Loe'' -> Loe''' -> loe
+
+\func loe-to-Loe {n m : Nat} (p : lessOrEq n m) : LessOrEq n m \elim n, m, p
+  | 0,         _, _ => z<=n
+  | suc n, suc m, p => s<=s $ loe-to-Loe p
+
+\func Loe-to-Loe' {n m : Nat} (p : LessOrEq n m) : LessOrEq' n m \elim n, m, p
+  | 0,          m,  p        => z<=n' idp
+  | suc n', suc m', (s<=s p) => s<=s' idp idp (Loe-to-Loe' p)
+
+\func to-Loe'' (n : Nat) : LessOrEq'' 0 n \elim n
+  | 0     => <=-refl idp
+  | suc n => <=-step $ to-Loe'' n
+
+\func Loe'-to-Loe'' {n m : Nat} (p : LessOrEq' n m) : LessOrEq'' n m \elim m, p
+  | m, z<=n' p     => transport (\lam x => LessOrEq'' x m) (sym p) (to-Loe'' m)
+  | m, s<=s' p q t => Loe'-to-Loe'' t
+
+--  Expected type: LessOrEq'' n m
+--  Context:
+--    q : m = {Nat} suc m'    => m' = pred m
+--    p : n = {Nat} suc n'    => n' = pred n
+--    t : LessOrEq' n' m'
+--    n : Nat
+--    m : Nat
+
+\func Loe''-to-Loe''' {n m : Nat} (p : LessOrEq'' n m) : LessOrEq''' n m \elim n, m, p
+  | 0,     m, p => (m, idp)
+  | suc n, 0, <=-refl p => absurd $ suc/=0 p
+  | suc n, suc m, <=-refl p => (0, pmap suc (+-comm 0 n) *> p)
+  | suc n, suc m, <=-step p => \let k => Loe''-to-Loe''' p \in
+                            (suc k.1, pmap suc $ suc-+ k.1 n *> k.2)
+
+\func Loe'''-to-loe {n m : Nat} (p : LessOrEq''' n m) : lessOrEq n m \elim n, m, p
+  | 0, m, (k, p) => unit
+  | suc n, 0, (k, p) => absurd $ suc/=0 p
+  | suc n, suc m, (k, p) => Loe'''-to-loe (k, (pmap pred p))
 
 -- 4. Определите рефлексивное транзитивное замыкание отношения.
 --    То есть ReflTransClosure R -- это минимальное рефлексивное и транзитивное отношение, содержащее R.
