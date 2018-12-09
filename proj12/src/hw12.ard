@@ -1,0 +1,39 @@
+\import lect12
+
+-- 1. Тип Dec A лежит во вселенной \Set0. Сделайте, чтобы он лежал в \Prop, используя \use \level.
+
+\data Empty
+
+\func absurd {A : \Type} (e : Empty) : A
+
+\data Dec (A : \Prop)
+  | yes A
+  | no (A -> Empty)
+
+-- \func testDec : \Prop -> \Prop => Dec
+
+-- 2. Докажите следующий закон де Моргана.
+
+\func \infix 1 <-> (A B : \Type) => \Sigma (A -> B) (B -> A)
+
+\func deMorgan (A B C : \Prop) : (\Sigma A (B `Or` C)) <-> ((\Sigma A B) `Or` (\Sigma A C)) => {?}
+
+-- 3. Определите элиминатор для Or через Or-rec, не используя паттерн матчинг на Or.
+
+\func Or-elim {A B : \Prop} (C : Or A B -> \Prop)
+              (f : \Pi (x : A) -> C (inl x)) (g : \Pi (y : B) -> C (inr y))
+              (p : A `Or` B) : C p => {?}
+
+-- 4. Тип С называется когенератором, если для любых множеств A и B и любых функция f,g : A -> B верно, что если h `o` f = h `o` g для всех h : B -> C, то f = g.
+--    Докажите, что \Prop является когенератором.
+
+\func \fixr 9 o {A B C : \Type} (g : B -> C) (f : A -> B) => \lam a => g (f a)
+
+\func isCogenerator (C : \Type) => \Pi {A B : \Set} (f g : A -> B) (p : \Pi (h : B -> C) -> h `o` f = h `o` g) -> f = g
+
+\func PropIsCogenerator : isCogenerator \Prop => {?}
+
+-- 5. Докажите, что n-типы замкнуты относительно образования \Pi-типов.
+--    Hint: Доказательство по индукции. Для случая suc n нужно доказать, что если f,g : \Pi (x : A) -> B x верно f = g эквивалентно \Pi (x : A) -> f x = g x.
+
+\func levelPi {A : \Type} (B : A -> \Type) (n : Nat) (p : \Pi (x : A) -> B x `hasLevel` n) : (\Pi (x : A) -> B x) `hasLevel` n => {?}
