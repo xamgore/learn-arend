@@ -2,12 +2,128 @@
 
 -- 1. Определите функцию sscanf.
 
+-- Согласно: http://www.cplusplus.com/reference/cstdio/sscanf/
+--
+--     int sscanf ( const char * s, const char * format, ...);
+--
+-- где s -- исходная строка, format -- форматная строка, а ... -- ссылки на переменные.
+--
+-- * вместо исходной строки s будем принимать список лексем List lex
+-- * вместо форматной строки format будем принимать список инструкций List (Inst lex)
+-- * вместо ссылок на переменных будем возвращать гетерогенный список, то есть кортеж
+--   размер кортежа зависит от форматной строки, определим зависимый тип Out:
+
+\func Out {lex : \Type} (pattern : List (Inst lex)) : \Type \elim pattern
+  | nil => \Sigma
+  | cons int         pattern'   => \Sigma Int        (Out pattern')
+  | cons string      pattern'   => \Sigma (List lex) (Out pattern')
+  | cons (const str) pattern    => Out pattern
+
+-- есть format specifiers:
+-- * %s -- any number of non-whitespace characters, stopping at the first whitespace character found.
+-- * %d -- any number of decimal digits (0-9)
+-- other nonwhite characters are matched and skipped. If there is no match, sscanf fails
+
+-- sscanf "hi --- 5" "%s --- %d" == Just ("hi", 5)
+-- sscanf "hi --- 5" "%s %d"     == Nothing
+-- sscanf "hi5"      "%s%d"      == Nothing
+-- sscanf "hi5"      "%s"        == Just ("hi5")
+
+\data Bool | true | false
+
+\data Maybe (A : \Type) | Just A | Nothing
+
+
+
+-- compose `x` (work of the previous parser) &
+--         `parser` (the next parser that must be runned)
+\func \infixl 5 |> {A : \Type} {char : \Type} (x : Maybe (\Sigma A (List char)))
+                   {pattern : List (Inst char)} (parser : List char -> Maybe (Out pattern))
+  : Maybe (\Sigma A (Out pattern)) \elim x
+  | Nothing          => Nothing
+  | Just (x, source) => \case parser source \with {
+    | Nothing  => Nothing
+    | Just res => Just (x, res)  -- combine results
+  }
+
+-- takes a list of chars, returns parsed value and the rest of string
+\func Parser {char : \Type} (A : \Type) => List char -> Maybe (\Sigma A (List char))
+
+\func parseWord {char : \Type} (isSpace : char -> Bool) (source : List char)
+  : \Sigma (List char) (List char) \elim source
+  | nil             => (nil, nil)
+  | cons ch source' => \case isSpace ch \with {
+    | true  => (nil, source')
+    | false => \case parseWord isSpace source' \with {
+      | (word, non-parsed) => (cons ch word, non-parsed)
+    }
+  }
+
+\func sscanf {char : \Type}
+             {isSpace : char -> Bool}
+             {eq : char -> char -> Bool}
+             {parseInt : Parser {char} Int}
+             (pattern : List (Inst char))
+             (source : List char)
+  : Maybe (Out pattern) \elim pattern, source
+  -- empty pattern
+  | nil, _ => Just ()
+-- empty source string
+  | _, nil => Nothing
+-- pattern has %d and first char is digit => parse int
+  | cons int pattern', cons digit source' =>
+    parseInt (cons digit source') |> sscanf {char} {isSpace} {eq} {parseInt} pattern'
+-- pattern has %s => parse until the first whitespace
+  | cons string pattern', source =>
+    Just (parseWord isSpace source) |> sscanf {char} {isSpace} {eq} {parseInt} pattern'
+-- empty match, just skip
+  | cons (const nil) pattern', source =>
+    sscanf {char} {isSpace} {eq} {parseInt} pattern' source
+-- match exactly one symbol
+  | cons (const (cons mch match)) pattern', cons ch source' =>
+    \case ch `eq` mch \with {
+      | true  => sscanf {char} {isSpace} {eq} {parseInt} pattern' source'
+      | false => Nothing -- match failed
+    }
+
+
+
 -- 2. Определите тип бинарных сортированных деревьев.
 --    То есть таких деревьев, в которых для любого узла верно, что все элементы в левом поддереве меньше либо равны, чем значение в узле, которое меньше либо равно, чем все элементы в правом поддереве.
+\data SortedTree (A : Poset) : \Type
+  | leaf
+  | branch (left : SortedTree A) (x : A) (right : SortedTree A)
+           (left tree<<root x) (x root<<tree right)
+
+\data \infixl 5 tree<<root {A : Poset} (tree : SortedTree A) (root : A) : \Type \elim tree
+  | leaf => leafL
+  | branch _ x' _ _ _ => branchL (x' <= {A} root)
+
+\data \infixl 5 root<<tree {A : Poset} (root : A) (tree : SortedTree A) : \Type \elim tree
+  | leaf => leafR
+  | branch _ x' _ _ _ => branchR (root <= {A} x')
+
 
 -- 3. Реализуйте функцию сортировки, возвращающую SortedList.
 
-\func sort {A : TotalPoset} (xs : List A) : SortedList A => {?}
+\func sort {A : TotalPoset} (xs : List A) : SortedList A \elim xs
+  | nil       => snil
+  | cons x xs => insert x (sort xs)
+
+\func insert {A : TotalPoset} (a : A) (xs : SortedList A) : SortedList A \elim xs
+  | snil               => scons a snil nilL
+  | scons x xs xs-headL => \case totality a x \with {
+    | inl a<=x => -- a :: [x, xs...]
+      \let sorted => scons x xs xs-headL \in scons a sorted (consL a<=x : HeadL a sorted)
+    | inr x<=a => \case xs \with {
+      | snil => -- x :: [a]
+        \let sorted => scons a snil nilL \in scons x sorted (consL x<=a : HeadL x sorted)
+      | scons s ss ss-head => -- x :: [s, ss...] -- x<=s === ss-head
+        {?} -- x<=a & a<=s => x <= Head of (insert a xs)
+            -- x<=a & s<=a => x<=s => x <= Head of (insert a xs)
+            -- осталось это дело как-то записать ¯\_(ツ)_/¯
+    }
+  }
 
 -- 4. Реализуйте функцию filter и докажите ее корректность, то есть, что выполнены следующие условияЖ
 --    * filter p xs является подсписком xs
