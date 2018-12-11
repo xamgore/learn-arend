@@ -95,6 +95,7 @@
   | branch (left : SortedTree A) (x : A) (right : SortedTree A)
            (left tree<<root x) (x root<<tree right)
 
+-- Неправильно. root должен быть меньше/больше всех элементов дерева, а не только корня.
 \data \infixl 5 tree<<root {A : Poset} (tree : SortedTree A) (root : A) : \Type \elim tree
   | leaf => leafL
   | branch _ x' _ _ _ => branchL (x' <= {A} root)

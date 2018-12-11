@@ -33,6 +33,10 @@
 -- todo: Ээээ, а в чём разница между \Type 0 и \Type \lp, например?
 --                         или между \Type 1 и \Type (\suc \lp)?
 
+-- С \lp -- это полиморфная по уровню функция, иначе нет.
+-- Например, если у тебя есть функция \func id (A : \Type \lp) (a : A) => a, то ты можешь вызвать ее от любого типа: id Nat 0, id \Type100 \Type99, и т.д.
+-- Если же ты ее объявишь с константным уровнем \func id (A : \Type0) (a : A) => a, то ты можешь вызвать ее только от типа уровня 0, например id Nat 0, и всё, ты не можешь написать id \Type100 \Type99.
+
 \func idTest1 : \Pi (A : \Type \lp) -> A -> A => id' (\suc \lp) (id' (\suc \lp) id)
 \func idTest2 : \Type \lp -> \Type \lp        => id' (\suc \lp) Maybe
 \func idTest3 : \Type (\suc \lp)              => id' (\suc (\suc \lp)) Functor
@@ -153,9 +157,15 @@
       }) <= {A} cons {A} x xs
     \with {
       | true  => match idp filter-xs<=xs
-      | false => skip-head x xs (filter p xs) filter-xs<=xs -- filter p xs <= cons x xs
+      | false =>
+      -- skip-head x xs (filter p xs) filter-xs<=xs -- filter p xs <= cons x xs
       -- todo:   ^ а вот вместо skip-head получится переписать на case? у меня не вышло
+      -- Просто нужно передавать в \case все параметры функции, которые зависят от переменных, на которых мы паттерн матчимся, и указывать явно их типы.
+        \case xs \as xs', filter p xs \as ys, filter-xs<=xs : ys <= xs' \return ys <= cons x xs' \with {
+          | _, nil, p => empty-is-sublist
+          | cons a as, cons y ys, p => skip p
+        }
     }
-    \where \func skip-head {A : \Type} (x : A) (xs : List A) (ys : List A) (p : ys <= xs) : ys <= cons x xs \elim ys, xs
-      | nil, _ => empty-is-sublist
-      | cons y ys, cons a as => skip p
+    \where \func skip-head {A : \Type} (x : A) (xs : List A) (ys : List A) (p : ys <= xs) : ys <= cons x xs \elim xs, ys
+      | _, nil => empty-is-sublist
+      | cons a as, cons y ys => skip p
