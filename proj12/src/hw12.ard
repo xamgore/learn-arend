@@ -16,13 +16,28 @@
 
 \func \infix 1 <-> (A B : \Type) => \Sigma (A -> B) (B -> A)
 
-\func deMorgan (A B C : \Prop) : (\Sigma A (B `Or` C)) <-> ((\Sigma A B) `Or` (\Sigma A C)) => {?}
+\func deMorgan (A B C : \Prop) : (\Sigma A (B `Or` C)) <-> ((\Sigma A B) `Or` (\Sigma A C)) => (
+  \lam p => \case p \with {
+    | (a, inl b) => inl (a, b)
+    | (a, inr c) => inr (a, c)
+  },
+  \lam p => \case p \with {
+    | inl (a, b) => (a, inl b)
+    | inr (a, c) => (a, inr c)
+  }
+)
 
 -- 3. Определите элиминатор для Or через Or-rec, не используя паттерн матчинг на Or.
 
-\func Or-elim {A B : \Prop} (C : Or A B -> \Prop)
-              (f : \Pi (x : A) -> C (inl x)) (g : \Pi (y : B) -> C (inr y))
-              (p : A `Or` B) : C p => {?}
+\func Or-elim {A B : \Prop}
+              (H : A `Or` B -> \Prop)
+              (f : \Pi (x : A) -> H (inl x))
+              (g : \Pi (y : B) -> H (inr y))
+              (p : A `Or` B) : H p => Or-rec {A} {B} {H p} f g p
+
+-- todo  найс, ¯\_(^^)_/¯, и что с этим делать?
+--Expected type:         A -> H p
+--Actual type: \Pi (x : A) -> H (inl {A} {B} x)
 
 -- 4. Тип С называется когенератором, если для любых множеств A и B и любых функция f,g : A -> B верно, что если h `o` f = h `o` g для всех h : B -> C, то f = g.
 --    Докажите, что \Prop является когенератором.
@@ -36,4 +51,5 @@
 -- 5. Докажите, что n-типы замкнуты относительно образования \Pi-типов.
 --    Hint: Доказательство по индукции. Для случая suc n нужно доказать, что если f,g : \Pi (x : A) -> B x верно f = g эквивалентно \Pi (x : A) -> f x = g x.
 
-\func levelPi {A : \Type} (B : A -> \Type) (n : Nat) (p : \Pi (x : A) -> B x `hasLevel` n) : (\Pi (x : A) -> B x) `hasLevel` n => {?}
+\func levelPi {A : \Type} (B : A -> \Type) (n : Nat) (p : \Pi (x : A) -> B x `hasLevel` n) : (\Pi (x : A) -> B x) `hasLevel` n =>
+  {?}
