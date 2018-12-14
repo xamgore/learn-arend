@@ -1,31 +1,79 @@
 \import lect13
 
+\data Unit | unit
+
+\func absurd {A : \Type} (e : Empty) : A
+
+\func suc/=0 {n : Nat} (p : suc n = 0) : Empty =>
+  transport (\lam n => \case n \with { | 0 => Empty | suc _ => Unit }) p unit
+
+\func \infixr 5 *> {A : \Type} {a a' a'' : A} (p : a = a') (q : a' = a'') : a = a'' => transport (\lam x => a = x) q p
+
+\func \infixr 5 <* {A : \Type} {a' a'' a : A} (q : a' = a) (p : a' = a'') : a = a'' => transport (\lam x => x = a'') q p
+
 -- 1. Определите функцию negPred : Int -> Int такую, что negPred x = x, если x > 0, и negPred x = x - 1, если x <= 0.
 
-\func negPred (x : Int) : Int => {?}
+\func negPred (x : Int) : Int \elim x
+  | neg n => neg (suc n)  -- x < 0: x = x - 1
+  | pos 0 => neg 1        -- x = 1: x = -1
+  | pos n => pos n
 
 -- 2. Определите функции сложения и умножения для Int.
 
-\func \infixl 6 + (x y : Int) : Int => {?}
+\func \infixl 6 + (x y : Int) : Int
+  | pos 0, neg m => neg m
+  | neg m, pos 0 => neg m
+  | pos n, pos m => pos (n Nat.+ m)
+  | neg (suc n), neg m => neg (suc n Nat.+ m)
+  | pos (suc n), neg (suc m) => pos n + neg m
+  | neg (suc n), pos (suc m) => neg n + pos m
 
-\func \infixl 7 * (x y : Int) : Int => {?}
+\func \infixl 7 * (x y : Int) : Int
+  | pos x, pos y => pos (x Nat.* y)
+  | pos x, neg y => neg (x Nat.* y)
+  | neg (suc x), pos y => neg (suc x Nat.* y)
+  | neg (suc x), neg y => pos (suc x Nat.* y)
+
 
 -- 3. Определите тип данных BinNat для бинарных натуральных чисел.
 --    У него должно быть три конструктора: для 0, для чисел вида 2*n и чисел вида 2*n+1.
 --    Такой тип данных содержит несколько различных представлений для нуля.
 --    Используйте типы данных с условиями, чтобы вычислительно отождествить различные нули.
 
-\data BinNat
+\data BinNat | bzero
+{- 2*n   -}| beven (n : Nat) \elim n { | 0 => bzero }
+{- 2*n+1 -}| bodd Nat
 
 -- 4. Постройте функции Nat -> BinNat и BinNat -> Nat и докажите, что они взаимно обратны.
 
-\func NatToBinNat (n : Nat) : BinNat => {?}
+\func NatToBinNat (n : Nat) : BinNat
+  | 0     => bzero
+  | suc n => \case NatToBinNat n \with {
+    | bzero   => bodd 0 -- 0*2+1
+    | beven n => bodd n -- add +1
+    | bodd n  => beven (suc n)
+  }
 
-\func BinNatToNat (b : BinNat) : Nat => {?}
+\func BinNatToNat (b : BinNat) : Nat
+  | bzero   => 0
+  | beven n => 2 Nat.* n
+  | bodd n  => 2 Nat.* n Nat.+ 1
 
-\func nbn (n : Nat) : BinNatToNat (NatToBinNat n) = n => {?}
-
-\func bnb (b : BinNat) : NatToBinNat (BinNatToNat b) = b => {?}
+--\func nbn (n : Nat) : BinNatToNat (NatToBinNat n) = n
+--  | 0     => idp
+---- Expected type:
+----  BinNatToNat (\case NatToBinNat n \with {
+----    | bzero => bodd 0
+----    | beven n => bodd n
+----    | bodd n => beven (suc n)
+----  }) = {Nat} suc n
+--  | suc n => \case NatToBinNat n \with {
+--    | bzero   => {?}  -- todo: я даж хз, что сюда писать, с таким expected типом
+--    | beven n => {?}  --       что здесь вообще применить-то можно? индукцию с J по равенствам?
+--    | bodd n  => {?}  --       то есть, я просто не представляю, как это доказывать :(
+--  }
+--
+--\func bnb (b : BinNat) : NatToBinNat (BinNatToNat b) = b => {?}
 
 -- 5. Докажите, что функция pred сюръективна.
 
@@ -33,13 +81,13 @@
   | 0 => 0
   | suc n => n
 
-\func pred-is-sur : isSur pred => {?}
+\func pred-is-sur : isSur pred => \lam y => in (suc y, idp)
 
 -- 6. Докажите, что функция suc не сюръективна.
 
 \data Empty
 
-\func suc-is-not-sur (p : isSur suc) : Empty => {?}
+\func suc-is-not-sur (p : isSur suc) : Empty => \case p 0 \with { in (_, suc0=-1) => suc/=0 suc0=-1 }
 
 -- 7. Пусть f : A -> B и g : B -> C ─ некоторые функции.
 --    Докажите, что если f и g сюръективны, то g `o` f также сюръективна.
@@ -47,13 +95,22 @@
 
 \func \fixr 9 o {A B C : \Type} (g : B -> C) (f : A -> B) => \lam a => g (f a)
 
-\func o-sur {A B C : \Type} (f : A -> B) (g : B -> C) (p : isSur f) (q : isSur g) : isSur (g `o` f) => {?}
+\func o-sur {A B C : \Type} (f : A -> B) (g : B -> C) (p : isSur f) (q : isSur g) : isSur (g `o` f) =>
+  \lam z =>
+      \case q z \with {
+        | in (y, gy=z) => \case p y \with {
+          | in (x, fx=y) => in (x, pmap g fx=y *> gy=z)
+        }
+      }
 
-\func o-sur' {A B C : \Type} (f : A -> B) (g : B -> C) (p : isSur (g `o` f)) : isSur g => {?}
+\func o-sur' {A B C : \Type} (f : A -> B) (g : B -> C) (p : isSur (g `o` f)) : isSur g =>
+  \lam z => \case p z \with {
+    | in (x, gfx=z) => in (f x, gfx=z)
+  }
 
 -- 8. Определите множество конечных подмножеств множества A, то есть списков элементов A с точностью до перестановок и повторений элементов.
 
-\func Set (A : \Set) : \Set => {?}
+--\func Set (A : \Set) : \Set => {?}
 
 -- 9. Докажите, что функция является биекцией тогда и только тогда, когда она является инъекцией и сюръекцией.
 
@@ -62,3 +119,31 @@
 \func \infix 1 <-> (A B : \Type) => \Sigma (A -> B) (B -> A)
 
 \func isBij=isInj+isSur {A B : \Set} (f : A -> B) : isBij f <-> (\Sigma (isInj f) (isSur f)) => {?}
+
+\func isBij->isInj {A B : \Type} {f : A -> B} (bi : isBij f) : isInj f \elim bi
+  | (g, x->gfx=x, y->fgy=y) =>
+    \lam (x1 x2 : A) (fx1=fx2 : f x1 = f x2) =>
+        (x->gfx=x x1) <* pmap g fx1=fx2 *> (x->gfx=x x2) -- x1=x2
+
+\func isBij->isSur {A B : \Type} {f : A -> B} (bi : isBij f) : isSur f \elim bi
+  | (g, x->gfx=x, y->fgy=y) =>
+    \lam y => \let x => g y \in in (x, y->fgy=y y) -- f (g y) == y
+
+--\func isInj+isSur {A B : \Set} {f : A -> B} (inj : isInj f) (sur : isSur f) : isBij f =>
+--  (\lam (y : B) => \case sur y \with { | in (x, _) => x }, {?}, {?})
+
+-- wtf?
+-- [ERROR] hw13.ard:133:42:  Data type 'Trunc' is truncated to the universe \Prop
+--    which does not fit in the universe of the eliminator type: A
+--      In: | in (x,fx=y) => x
+
+\func isInj+isSur {A B : \Set} {f : A -> B} (inj : isInj f) (sur : isSur f) : isBij f =>
+  \let y->[x&fx=y] (y : B) => \case sur y \with { | in (x, p) => (x, p) } \in
+  \let g => \lam y => (y->[x&fx=y] y).1 \in
+      (g, {?}, {?})
+
+-- wtf?
+--[ERROR] hw13.ard:141:31: Cannot infer the result type
+--  In: \case sur y \with {
+--          | in (x,p) => (x, p)
+--      }
