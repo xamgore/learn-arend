@@ -73,6 +73,9 @@
 --    | bodd n  => {?}  --       то есть, я просто не представляю, как это доказывать :(
 --  }
 --
+-- J здесь вообще не нужен. У тебя же здесь нет никаких равенств.
+-- Я бы посоветовал оформить \case в определении NatToBinNat в виде отдельной функции bsuc. Тогда можно будет доказать, что он коммутирует с BinNatToNat.
+--
 --\func bnb (b : BinNat) : NatToBinNat (BinNatToNat b) = b => {?}
 
 -- 5. Докажите, что функция pred сюръективна.
@@ -136,6 +139,8 @@
 -- [ERROR] hw13.ard:133:42:  Data type 'Trunc' is truncated to the universe \Prop
 --    which does not fit in the universe of the eliminator type: A
 --      In: | in (x,fx=y) => x
+-- Обрезанные типы данных можно элиминировать только в соответствующий уровень.
+-- Если мы обрезали до \Prop, то тип, в который мы его эиминируем, должен лежать в \Prop.
 
 \func isInj+isSur {A B : \Set} {f : A -> B} (inj : isInj f) (sur : isSur f) : isBij f =>
   \let y->[x&fx=y] (y : B) => \case sur y \with { | in (x, p) => (x, p) } \in
@@ -147,3 +152,4 @@
 --  In: \case sur y \with {
 --          | in (x,p) => (x, p)
 --      }
+-- Так как \case написан внутри \let, он не знает его тип. Нужно либо написать \return, либо указать тип переменной в \let.
