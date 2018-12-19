@@ -1,20 +1,59 @@
 \import lect09
+\open Nat
+
+\func pmap {A B : \Type} (f : A -> B) {a a' : A} (p : a = a') => path (\lam i => f (p @ i))
 
 -- 1. Определите факториал через Nat-rec.
 
+\func fac : Nat -> Nat => Nat-rec 1 (\lam n' rec => suc n' * rec)
+
 -- 2. Докажите ассоциативность сложения для натуральных чисел через Nat-elim.
+
+\func +-assoc (n m k : Nat) : (n + m) + k = n + (m + k) =>
+  \let | forZero => idp
+       | inductEq => \lam k => (n + m) + k = n + (m + k)
+  \in Nat-elim inductEq forZero (\lam _ x => pmap suc x) k
 
 -- 3. Определите через Nat-<-ind либо div, либо toDivDom.
 
-\func div (n k : Nat) : Nat => {?}
+--\func div (n k : Nat) : Nat => {?}
 
-\func toDivDom {n k : Nat} (t : T (0 < k)) : divDom n k => {?}
+--\func toDivDom {n k : Nat} (t : T (0 < k)) : divDom n k => {?}
 
 -- 4. Определите элиминатор для D.
 
+--\data D
+--  | con1 Nat
+--  | con2 D D
+--  | con3 (Nat -> D)
+
+\func D-elim (E : D -> \Type)
+             (c1 : \Pi (n : Nat) -> E (con1 n))
+             (c2 : \Pi (dl : D) -> E dl -> \Pi (dr : D) -> E dr -> E (con2 dl dr))
+             (c3 : \Pi (f : Nat -> D) -> (\Pi (n : Nat) -> E (f n)) -> E (con3 f))
+             (d : D) : E d \elim d
+  | con1 n     => c1 n
+  | con2 dl dr => c2 dl (D-elim E c1 c2 c3 dl) dr (D-elim E c1 c2 c3 dr)
+  | con3 f     => c3 f (\lam n => D-elim E c1 c2 c3 (f n))
+
 -- 5. Определите рекурсор и элиминатор для List.
+
+\func List-rec {A E : \Type} (onEmpty : E) (onCons : A -> List A -> E -> E) (xs : List A) : E \elim xs
+  | nil       => onEmpty
+  | cons x xs => onCons x xs (List-rec onEmpty onCons xs)
+
+\func List-elim {A : \Type} (E : List A -> \Type)
+                (onEmpty : E nil)
+                (onCons : \Pi (x : A) -> \Pi (xs : List A) -> E xs -> E (cons x xs))
+                (xs : List A) : E xs \elim xs
+  | nil => onEmpty
+  | cons x xs => onCons x xs (List-elim {A} E onEmpty onCons xs)
 
 -- 6. Докажите принцип индукции для натуральных чисел, позволяющий использовать индукционную гипотезу для любого меньшего числа.
 --    Hint: Прежде, чем доказывать утверждение по индукции, его можно обобщить.
 
-\func Nat-<-ind (P : Nat -> \Type) (h : \Pi (n : Nat) -> (\Pi (k : Nat) -> T (k < n) -> P k) -> P n) (n : Nat) : P n => {?}
+\func Nat-<-ind (P : Nat -> \Type) (h : \Pi (n : Nat) -> (\Pi (k : Nat) -> T (k < n) -> P k) -> P n) (n : Nat) : P n
+  => h n (\lam (k : Nat) (k<N : T (k < n)) => {?})  -- вызвать (h k ??), для k>0 ?? будет то же что и {?}
+                                                    --                   для k=0 в ?? вторым аргументом передадут T (k < 0)
+                                                    --                           то есть T false, от этого, наверное, надо
+                                                    --                           плясать?
